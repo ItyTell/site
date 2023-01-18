@@ -56,6 +56,8 @@
         $('#videoModal').on('hide.bs.modal', function (e) {
             $("#video").attr('src', $videoSrc);
         })
+
+        $(".colorbox-iframe").colorbox({iframe:true, height:"600px", width: "1000px", scrolling: true});
     });
 
 
