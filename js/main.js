@@ -57,7 +57,7 @@
             $("#video").attr('src', $videoSrc);
         })
 
-        $(".colorbox-iframe").colorbox({iframe:true, height:"600px", width: "1000px", scrolling: true});
+        $(".colorbox-iframe").colorbox({iframe:true, height:"90%", width: "80%", scrolling: true});
     });
 
 
