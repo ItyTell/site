@@ -61,8 +61,11 @@
                 <h3 class="mb-4">Forchun method with moving points</h3>
             </div>
             <div class="row align-items-center">
-                <div class="col-lg-5 pb-4 pb-lg-0 ">
-                    <canvas id="canvas_1" class="canvas_moving_points " ></canvas>
+                <div class="canvas_1_box">
+                    <canvas id="canvas_1" class="canvas_moving_points" onclick="new_edge(event)" ></canvas>
+                </div>
+                <div>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" onclick="clear_edges()">Clear edges</a>
                 </div>
             </div>
             <div class="row align-items-center justify-content-center py-5">

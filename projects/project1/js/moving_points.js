@@ -2,7 +2,7 @@ const canvas = document.getElementById("canvas_1");
 const ctx = canvas.getContext("2d");
 let xMax = canvas.width = window.innerWidth * 0.55;
 let yMax = canvas.height = window.innerHeight * 0.65;
-let edge_rad = 20 
+let edge_rad = 3 
 
 class Edge{
 
@@ -22,11 +22,11 @@ class Edge{
 let edges = [];
 
 
-function getMousePos(canvas, evt) {
+function getMousePos(canvas, event) {
   var rect = canvas.getBoundingClientRect();
   return {
-    x: evt.clientX - rect.left,
-    y: evt.clientY - rect.top
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
   };
 };
 
@@ -57,7 +57,10 @@ function drew_edges(){
     };
 };
 
-window.addEventListener('click', new_edge);
+function clear_edges(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    edges = [];
+}
 
 window.addEventListener('resize', function(){
     xMax = canvas.width = window.innerWidth * 0.55;
