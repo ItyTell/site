@@ -5,11 +5,10 @@ var Engine = Matter.Engine,
 
 const canvas = document.getElementById("canvas_1");
 const ctx = canvas.getContext("2d");
-let xMax = canvas.width = window.innerWidth * 0.55;
-let yMax = canvas.height = window.innerHeight * 0.65;
 let edge_rad = 10; 
 let speed = 10;
-
+let xMax = canvas.width = window.innerWidth * 0.55;
+let yMax = canvas.height = window.innerHeight * 0.65;
 
 var engine = Engine.create();
 
@@ -22,12 +21,20 @@ function start(){
 }
 start();
 
-function drew(edge){
-    ctx.fillStyle = "red";
-    ctx.beginPath();
-    ctx.arc(edge.position.x, edge.position.y, edge_rad, 0, Math.PI * 2)
-    ctx.stroke();
-    ctx.fill();
+function drew(ctx_0, x, y){
+    ctx_0.fillStyle = "red";
+    ctx_0.beginPath();
+    ctx_0.arc(x, y, edge_rad, 0, Math.PI * 2)
+    ctx_0.stroke();
+    ctx_0.fill();
+}
+
+function drew_segments(ctx_0, segm){
+    ctx_0.beginPath();
+    ctx_0.moveTo(segm.start.x, segm.start.y);
+    ctx_0.lineTo(segm.end.x, segm.end.y);
+    ctx_0.strokeStyle = "#0bceaf"; 
+    ctx_0.stroke();
 }
 
 let edges = [];
@@ -42,7 +49,7 @@ function getMousePos(canvas, event) {
   };
 };
 
-function check_cords(cords){
+function check_cords_canvas1(cords){
     if ((cords.x - edge_rad < 0) || (cords.y - edge_rad < 0)){return false;}
     if ((cords.x + edge_rad > xMax) || (cords.y + edge_rad > yMax)){return false;}
 
@@ -54,9 +61,9 @@ function check_cords(cords){
     return true;
 };
 
-function new_edge(event) {
+function new_edge_canvas1(event) {
     mouse = getMousePos(canvas, event);
-    if (check_cords(mouse)){
+    if (check_cords_canvas1(mouse)){
         edges.push(Bodies.circle(mouse.x, mouse.y, edge_rad, {
         inertia: Infinity,
         frictionStatic: 1,
@@ -70,13 +77,13 @@ function new_edge(event) {
     };
 };
 
-function drew_edges(){
+function drew_edges_canvas1(){
     for (let i = 0; i < edges.length; i++){
-        drew(edges[i]);
+        drew(ctx, edges[i].position.x, edges[i].position.y);
     };
 };
 
-function clear_edges(){
+function clear_edges_canvas1(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     engine = Engine.create();
     start()
@@ -86,17 +93,71 @@ function clear_edges(){
 
 function animate(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drew_edges();
+    drew_edges_canvas1();
     requestAnimationFrame(animate);
     Engine.update(engine, 1000 / 60);
 }
+animate();
 
-animate()
+//canvas 2
+
+const canvas_2 = document.getElementById("canvas_2");
+const ctx_2 = canvas_2.getContext("2d");
+let edge_rad_canvas2 = 10; 
+canvas_2.width = window.innerWidth * 0.55;
+canvas_2.height = window.innerHeight * 0.65;
+
+let edges_2 = [] 
+
+function check_cords_canvas_2(cords){
+    if ((cords.x - edge_rad_canvas2 < 0) || (cords.y - edge_rad_canvas2 < 0)){return false;}
+    if ((cords.x + edge_rad_canvas2 > xMax) || (cords.y + edge_rad_canvas2 > yMax)){return false;}
+
+    for (let i = 0; i < edges_2.length; i++){
+        if (Math.pow(cords.x - edges_2[i].x, 2) + Math.pow(cords.y - edges_2[i].y, 2) < 4 * edge_rad * edge_rad){
+            return false;
+        };
+    };
+    return true;
+};
 
 
+function new_edge_canvas2(event) {
+    mouse = getMousePos(canvas_2, event);
+    if (check_cords_canvas_2(mouse)){
+        edges_2.push({x:mouse.x, y:mouse.y});
+        drew(ctx_2, mouse.x, mouse.y)
+    };
+};
+
+function drew_edges_canvas_2(){
+    for (let i = 0; i < edges_2.length; i++){
+        drew(ctx_2, edges_2[i].x, edges_2[i].y);
+    };
+}
+
+
+function clear_edges_canvas_2(){
+    ctx_2.clearRect(0, 0, canvas.width, canvas.height);
+    edges_2 = [];
+}
+
+function voronoi(){
+    if (edges_2.length < 2){return;}
+    let vor = new VoronoiDiagram(edges_2, canvas_2.width, canvas_2.height); 
+    vor.update();
+    let segments = vor.edges;
+    for (let i = 0; i < segments.length; i++){
+        if (segments[i] != null){
+            drew_segments(ctx_2, segments[i]);
+        }
+    }
+
+}
 
 window.addEventListener('resize', function(){
-    xMax = canvas.width = window.innerWidth * 0.55;
-    yMax = canvas.height = window.innerHeight * 0.65;
-    drew_edges();
+    xMax = canvas.width = canvas_2.width = window.innerWidth * 0.55;
+    yMax = canvas.height = canvas_2.height = window.innerHeight * 0.65;
+    drew_edges_canvas1();
+    drew_edges_canvas_2();
 });

@@ -62,18 +62,22 @@
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
-                    <canvas id="canvas_1" class="canvas_moving_points" onclick="new_edge(event)" ></canvas>
+                    <canvas id="canvas_1" class="canvas_moving_points" onclick="new_edge_canvas1(event)" ></canvas>
                 </div>
                 <div>
-                    <a class="btn btn-outline-primary d-lg-block canvas_button" onclick="clear_edges()">Clear edges</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" onclick="clear_edges_canvas1()">Clear edges</a>
                 </div>
             </div>
             <div class="row align-items-center justify-content-center py-5">
                 <h3 class="mb-4">Delone triangulation with moving points</h3>
             </div>
             <div class="row align-items-center">
-                <div class="col-lg-5 pb-4 pb-lg-0">
-                    <img src="video/video2.gif" class="img-fluid" > 
+                <div class="canvas_1_box">
+                    <canvas id="canvas_2" class="canvas_moving_points" onclick="new_edge_canvas2(event)" ></canvas>
+                </div>
+                <div>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" onclick="clear_edges_canvas_2()">Clear edges</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" onclick="voronoi()">Voronoi</a>
                 </div>
             </div>
         </div>
@@ -254,6 +258,7 @@
     <script src="../../lib/lightbox/js/lightbox.min.js"></script>
     <script src="../../lib/colorbox/jquery.colorbox.js"></script>
     <script src="../../lib/matter/matter.js"></script>
+    
 
     <!-- Contact Javascript File -->
     <script src="../../mail/jqBootstrapValidation.min.js"></script>
@@ -262,6 +267,7 @@
     <!-- Template Javascript -->
     <script src="../../js/main.js"></script>
     <script src="js\moving_points.js"> </script>
+    <script src="js/Voronoi.js"></script>
 </body>
 
 </html>
