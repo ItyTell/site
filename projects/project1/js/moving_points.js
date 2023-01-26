@@ -6,9 +6,10 @@ var Engine = Matter.Engine,
 const canvas = document.getElementById("canvas_1");
 const ctx = canvas.getContext("2d");
 let edge_rad = 10; 
-let speed = 10;
+let speed = 5;
 let xMax = canvas.width = window.innerWidth * 0.55;
 let yMax = canvas.height = window.innerHeight * 0.65;
+let voronoi_on = true;
 
 var engine = Engine.create();
 
@@ -91,13 +92,35 @@ function clear_edges_canvas1(){
     edges = [];
 }
 
+function voronoi_canvas_1(){
+    if (edges.length < 2){return;}
+    let points =[]
+    for (let i = 0; i < edges.length; i++){points.push(edges[i].position);}
+    let vor = new VoronoiDiagram(points, canvas.width, canvas.height); 
+    vor.update();
+    let segments = vor.edges;
+    for (let i = 0; i < segments.length; i++){
+        if (segments[i] != null){
+            drew_segments(ctx, segments[i]);
+        }
+    }
+}
+
 function animate(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drew_edges_canvas1();
+    if (voronoi_on){
+        voronoi_canvas_1();
+    }
     requestAnimationFrame(animate);
     Engine.update(engine, 1000 / 60);
 }
 animate();
+
+
+function turn_voronoi(){
+    voronoi_on = !voronoi_on;
+}
 
 //canvas 2
 
@@ -143,6 +166,8 @@ function clear_edges_canvas_2(){
 }
 
 function voronoi(){
+    ctx_2.clearRect(0, 0, canvas.width, canvas.height);
+    drew_edges_canvas_2();
     if (edges_2.length < 2){return;}
     let vor = new VoronoiDiagram(edges_2, canvas_2.width, canvas_2.height); 
     vor.update();
