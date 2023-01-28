@@ -60,14 +60,15 @@ window.onload = function(){
 
 function resizeCanvas(canvas)
 {
-    xMax = canvas.width  = window.outerWidth / 2.1 + 100;
-    yMax = canvas.height = canvas.offsetHeight * 3;
+    xMax = canvas.width  = window.innerWidth * 0.6;
+    yMax = canvas.height = window.innerHeight * 0.75;
     zoom_scale_x = zoom_scale_x * canvas.width / canvas_width;
     zoom_scale_y = zoom_scale_y * canvas.height  / canvas_height; 
     edges_rad_max = min(zoom_scale_x, zoom_scale_y) * edge_rad_standart;
     recordinate_edges();
 }
 window.addEventListener('resize', function(){
+    console.log(window.outerWidth, window.outerHeight)
     resizeCanvas(canvas_1);
     resizeCanvas(canvas_2);
 });
