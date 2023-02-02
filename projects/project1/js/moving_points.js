@@ -21,6 +21,7 @@ engine.world.gravity.y = 0;
 
 let speed = 10;
 let voronoi_on = true;
+let delone_on = false;
 
 
 var edges_positions_canvas_1 = [];
@@ -236,13 +237,27 @@ function voronoi_canvas_1(){
         }
     }
 }
+function delone_canvas_1(){
+    let tri = new Triangulation(xMax, yMax);
+    edges_positions_canvas_1.forEach(edge =>{
+        tri.add_point(edge);
+    })
+    tri.chop(xMax, yMax);
+    tri.triangles.forEach(triangle=> {
+        drew_triangle(ctx_1, triangle);
+    })
+}
+
 
 function animate(){
     ctx_1.clearRect(0, 0, canvas_1.width, canvas_1.height);
-    drew_edges(ctx_1, edges_positions_canvas_1, edges_rad_canvas_1);
     if (voronoi_on){
         voronoi_canvas_1();
-    }
+    };
+    if (delone_on){
+        delone_canvas_1();
+    };
+    drew_edges(ctx_1, edges_positions_canvas_1, edges_rad_canvas_1);
     requestAnimationFrame(animate);
     Engine.update(engine, render);
 }
@@ -250,6 +265,10 @@ function animate(){
 
 function turn_voronoi(){
     voronoi_on = !voronoi_on;
+}
+
+function turn_delone(){
+    delone_on = !delone_on;
 }
 
 
