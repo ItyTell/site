@@ -1,38 +1,43 @@
-var canvas_width_old = 944;
-var canvas_height_old = 527;
-var zoom_scale_x = 1;
-var zoom_scale_y = 1;
+var canvas_width_old;
+var canvas_height_old;
+var zoom_scale_x;
+var zoom_scale_y;
 
-var edge_rad_standart = 10;
-var edges_rad_max;
+var point_rad_standart;
+var points_rad_max;
 
-var edges_rad_canvas_1;
-var edges_rad_canvas_2;
+var points_rad_canvas_1;
+var points_rad_canvas_2;
+var points_rad_canvas_3;
 
-var render = 1000.0/30.0; //fps
+var render;
+var anim_cooldown;
 var Engine = Matter.Engine,
     Runner = Matter.Runner,
     Bodies = Matter.Bodies,
     Composite = Matter.Composite;
 
 
-var engine = Engine.create();
-engine.world.gravity.y = 0; 
+var engine;
 
-let speed = 10;
-let voronoi_on = true;
-let delone_on = false;
+var speed;
+var voronoi_on;
+var delone_on;
 
 
-var edges_positions_canvas_1 = [];
-var edges_canvas_2 = [];
-var edges_bodies_canvas_1 = [];
+var points_positions_canvas_1 = [];
+var points_canvas_2 = [];
+var points_canvas_3 = [];
+var points_bodies_canvas_1 = [];
 var walls = [];
 
 var canvas_1 = document.getElementById("canvas_1");
 var canvas_2 = document.getElementById("canvas_2");
+var canvas_3 = document.getElementById("canvas_3");
+var canvases = [canvas_1, canvas_2, canvas_3];
 const ctx_1 = canvas_1.getContext("2d");
 const ctx_2 = canvas_2.getContext("2d");
+const ctx_3 = canvas_3.getContext("2d");
 
 var xMax;
 var yMax;
@@ -43,18 +48,27 @@ function min(x, y){
 }
 
 window.onload = function(){
+    canvas_width_old = 944;
+    canvas_height_old = 527;
+    zoom_scale_x = 1;
+    zoom_scale_y = 1;
+    point_rad_standart = 10;
 
-    resizeCanvas(canvas_1);
-    resizeCanvas(canvas_2);
-    recordinate_edges();
-    spawn_walls();
-    edges_rad_canvas_1 = edges_rad_max;
-    edges_rad_canvas_2 = edges_rad_max;
+    render = 1000.0/30.0; //fps
+    engine = Engine.create();
+    engine.world.gravity.y = 0; 
     
-    //canvas.onmousedown = function(e) { onCanvasMouseDown(canvas, e); };
-    //canvas.onmousemove = function(e) { onCanvasMouseMove(canvas, e); };
-    //canvas.onmouseup = function(e) { onCanvasMouseUp(canvas, e); };
-    //canvas.onwheel = function(e) { onCanvasMouseWheel(canvas, e); };
+    anim_cooldown = 1000.0;
+    
+    speed = 10;
+    voronoi_on = true;
+    delone_on = false;
+    canvases.forEach(canvas=> {resizeCanvas(canvas);})
+    recordinate_points();
+    spawn_walls();
+    points_rad_canvas_1 = points_rad_max;
+    points_rad_canvas_2 = points_rad_max;
+    points_rad_canvas_3 = points_rad_max;
 
     animate();
 }
@@ -68,36 +82,43 @@ function resizeCanvas(canvas)
     yMax = canvas.height = window.innerHeight * 0.75;
     zoom_scale_x = canvas.width / canvas_width_old;
     zoom_scale_y = canvas.height  / canvas_height_old; 
-    edges_rad_max = zoom_scale_x ** 0.5 * edge_rad_standart;
+    points_rad_max = zoom_scale_x ** 0.5 * point_rad_standart;
 }
 
 
 
 window.addEventListener('resize', function(){
-    console.log(window.outerWidth, window.outerHeight)
-    resizeCanvas(canvas_1);
-    resizeCanvas(canvas_2);
-    recordinate_edges();
+    canvases.forEach(canvas=> {resizeCanvas(canvas);})
+    recordinate_points();
 });
 
-function recordinate_edges(){
+function recordinate_points(){
     engine = Engine.create();
     engine.world.gravity.y = 0; 
-    let old_edges_canvas_1 = [];
-    edges_bodies_canvas_1.forEach(body => {old_edges_canvas_1.push(body);});
-    edges_positions_canvas_1 = [];
-    edges_bodies_canvas_1 = [];
-    for (let i = 0; i < old_edges_canvas_1.length; i++){
-        old_body_canvas1({x: old_edges_canvas_1[i].position.x * zoom_scale_x,
-        y: old_edges_canvas_1[i].position.y * zoom_scale_y,}, old_edges_canvas_1[i].velocity)
+    let old_points_canvas_1 = [];
+    points_bodies_canvas_1.forEach(body => {old_points_canvas_1.push(body);});
+    points_positions_canvas_1 = [];
+    points_bodies_canvas_1 = [];
+    for (let i = 0; i < old_points_canvas_1.length; i++){
+        old_body_canvas1({x: old_points_canvas_1[i].position.x * zoom_scale_x,
+        y: old_points_canvas_1[i].position.y * zoom_scale_y,}, old_points_canvas_1[i].velocity)
     }
     spawn_walls();
-    for (let i = 0; i < edges_canvas_2.length; i++){
-        edges_canvas_2[i].x = edges_canvas_2[i].x * zoom_scale_x;
-        edges_canvas_2[i].y = edges_canvas_2[i].y * zoom_scale_y;
+
+
+    for (let i = 0; i < points_canvas_2.length; i++){
+        points_canvas_2[i].x = points_canvas_2[i].x * zoom_scale_x;
+        points_canvas_2[i].y = points_canvas_2[i].y * zoom_scale_y;
     }
     ctx_2.clearRect(0, 0, canvas_2.width, canvas_2.height);
-    drew_edges(ctx_2, edges_canvas_2, edges_rad_canvas_2)
+    drew_points(ctx_2, points_canvas_2, points_rad_canvas_2)
+
+    for (let i = 0; i < points_canvas_3.length; i++){
+        points_canvas_3[i].x = points_canvas_3[i].x * zoom_scale_x;
+        points_canvas_3[i].y = points_canvas_3[i].y * zoom_scale_y;
+    }
+    ctx_3.clearRect(0, 0, canvas_3.width, canvas_3.height);
+    drew_points(ctx_3, points_canvas_3, points_rad_canvas_3)
 }
 
 
@@ -149,21 +170,21 @@ function getMousePos(canvas, event) {
 };
 
 
-function check_cords(cords, edges, rad){
+function check_cords(cords, points, rad){
     if ((cords.x - rad < 0) || (cords.y - rad < 0)){return false;}
     if ((cords.x + rad > xMax) || (cords.y + rad > yMax)){return false;}
 
-    for (let i = 0; i < edges.length; i++){
-        if (Math.pow(cords.x - edges[i].x, 2) + Math.pow(cords.y - edges[i].y, 2) < 4 * rad * rad){
+    for (let i = 0; i < points.length; i++){
+        if (Math.pow(cords.x - points[i].x, 2) + Math.pow(cords.y - points[i].y, 2) < 4 * rad * rad){
             return false;
         };
     };
     return true;
 };
 
-function new_edge_canvas1(event) {
+function new_point_canvas1(event) {
     mouse = getMousePos(canvas_1, event);
-    if (check_cords(mouse, edges_positions_canvas_1, edges_rad_canvas_1)){
+    if (check_cords(mouse, points_positions_canvas_1, points_rad_canvas_1)){
         new_body_canvas1(mouse);
     }
 };
@@ -172,19 +193,19 @@ function new_body_canvas1(mouse){
     let body = create_body_canvas_1(mouse);
     let angel = Math.random() * 2 * Math.PI;
     Matter.Body.setVelocity(body, {x: speed * Math.cos(angel), y: speed * Math.sin(angel),});
-    edges_positions_canvas_1.push(body.position);
+    points_positions_canvas_1.push(body.position);
 }
 
 function old_body_canvas1(mouse, velocity){
     let body = create_body_canvas_1(mouse);
     Matter.Body.setVelocity(body, velocity);
-    edges_positions_canvas_1.push(body.position);
+    points_positions_canvas_1.push(body.position);
 }
 
 function create_body_canvas_1(mouse){
     let body =  Bodies.circle(mouse.x, 
                             mouse.y, 
-                            edges_rad_canvas_1, 
+                            points_rad_canvas_1, 
                             {
                             inertia: Infinity,
                             frictionStatic: 1,
@@ -192,43 +213,43 @@ function create_body_canvas_1(mouse){
                             frictionAir: 0,
                             friction: 0,
                         });
-    edges_bodies_canvas_1.push(body);
+    points_bodies_canvas_1.push(body);
     Composite.add(engine.world, body);
     return body;
 }
 
-function new_edge_canvas2(event) {
-    mouse = getMousePos(canvas_2, event);
-    if (check_cords(mouse, edges_canvas_2, edges_rad_canvas_2)){
-        edges_canvas_2.push({x:mouse.x, y:mouse.y});
-        drew(ctx_2, mouse, edges_rad_canvas_2)
+function new_point_canvas_static(event, canvas, ctx, points, rad) {
+    mouse = getMousePos(canvas, event);
+    if (check_cords(mouse, points, rad)){
+        points.push({x:mouse.x, y:mouse.y});
+        drew(ctx, mouse, rad);
     };
 };
 
 
-function drew_edges(ctx, edges, rad){
-    for (let i = 0; i < edges.length; i++){
-        drew(ctx, edges[i], rad);
+function drew_points(ctx, points, rad){
+    for (let i = 0; i < points.length; i++){
+        drew(ctx, points[i], rad);
     };
 };
 
-function clear_edges_canvas1(){
+function clear_points_canvas1(){
     ctx_1.clearRect(0, 0, canvas_1.width, canvas_1.height);
     engine = Engine.create();
     spawn_walls()
     engine.world.gravity.y = 0; 
-    edges_positions_canvas_1 = [];
-    edges_bodies_canvas_1 = [];
+    points_positions_canvas_1 = [];
+    points_bodies_canvas_1 = [];
 }
 
-function clear_edges_canvas_2(){
+function clear_points_canvas_2(){
     ctx_2.clearRect(0, 0, canvas_2.width, canvas_2.height);
-    edges_canvas_2 = [];
+    points_canvas_2 = [];
 }
 
 function voronoi_canvas_1(){
-    if (edges_positions_canvas_1.length < 2){return;}
-    let vor = new VoronoiDiagram(edges_positions_canvas_1, canvas_1.width, canvas_1.height); 
+    if (points_positions_canvas_1.length < 2){return;}
+    let vor = new VoronoiDiagram(points_positions_canvas_1, canvas_1.width, canvas_1.height); 
     vor.update();
     let segments = vor.edges;
     for (let i = 0; i < segments.length; i++){
@@ -239,8 +260,8 @@ function voronoi_canvas_1(){
 }
 function delone_canvas_1(){
     let tri = new Triangulation(xMax, yMax);
-    edges_positions_canvas_1.forEach(edge =>{
-        tri.add_point(edge);
+    points_positions_canvas_1.forEach(point =>{
+        tri.add_point(point);
     })
     tri.chop(xMax, yMax);
     tri.triangles.forEach(triangle=> {
@@ -257,7 +278,7 @@ function animate(){
     if (delone_on){
         delone_canvas_1();
     };
-    drew_edges(ctx_1, edges_positions_canvas_1, edges_rad_canvas_1);
+    drew_points(ctx_1, points_positions_canvas_1, points_rad_canvas_1);
     requestAnimationFrame(animate);
     Engine.update(engine, render);
 }
@@ -274,9 +295,9 @@ function turn_delone(){
 
 function voronoi(){
     ctx_2.clearRect(0, 0, canvas_2.width, canvas_2.height);
-    drew_edges(ctx_2, edges_canvas_2, edges_rad_canvas_2);
-    if (edges_canvas_2.length < 2){return;}
-    let vor = new VoronoiDiagram(edges_canvas_2, canvas_2.width, canvas_2.height); 
+    drew_points(ctx_2, points_canvas_2, points_rad_canvas_2);
+    if (points_canvas_2.length < 2){return;}
+    let vor = new VoronoiDiagram(points_canvas_2, canvas_2.width, canvas_2.height); 
     vor.update();
     let segments = vor.edges;
     for (let i = 0; i < segments.length; i++){
@@ -284,21 +305,18 @@ function voronoi(){
             drew_segments(ctx_2, segments[i]);
         }
     }
-
 }
 
 function delone(){
     ctx_2.clearRect(0, 0, canvas_2.width, canvas_2.height);
-    drew_edges(ctx_2, edges_canvas_2, edges_rad_canvas_2);
+    drew_points(ctx_2, points_canvas_2, points_rad_canvas_2);
     let tri = new Triangulation(xMax, yMax);
-    edges_canvas_2.forEach(edge =>{
-        tri.add_point(edge);
+    points_canvas_2.forEach(point =>{
+        tri.add_point(point);
     })
     tri.chop(xMax, yMax);
     tri.triangles.forEach(triangle=> {
         drew_triangle(ctx_2, triangle);
     })
-    drew_edges(ctx_2, edges_canvas_2, edges_rad_canvas_2);
-
-
+    drew_points(ctx_2, points_canvas_2, points_rad_canvas_2);
 }

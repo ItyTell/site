@@ -3,7 +3,7 @@
     width: 1546;
     height: 1000;
 }
-.canvas_moving_points{
+.canvas{
     border: 1px solid grey;
     max-height: 40em;
 }
