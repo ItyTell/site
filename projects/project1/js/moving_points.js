@@ -1,9 +1,9 @@
-var canvas_width = 1536;
-var canvas_height = 1000;
+var canvas_width_old = 944;
+var canvas_height_old = 527;
 var zoom_scale_x = 1;
 var zoom_scale_y = 1;
 
-var edge_rad_standart = 40;
+var edge_rad_standart = 10;
 var edges_rad_max;
 
 var edges_rad_canvas_1;
@@ -19,13 +19,14 @@ var Engine = Matter.Engine,
 var engine = Engine.create();
 engine.world.gravity.y = 0; 
 
-let speed = 5;
+let speed = 10;
 let voronoi_on = true;
 
 
 var edges_positions_canvas_1 = [];
 var edges_canvas_2 = [];
 var edges_bodies_canvas_1 = [];
+var walls = [];
 
 var canvas_1 = document.getElementById("canvas_1");
 var canvas_2 = document.getElementById("canvas_2");
@@ -44,54 +45,71 @@ window.onload = function(){
 
     resizeCanvas(canvas_1);
     resizeCanvas(canvas_2);
-    
+    recordinate_edges();
     spawn_walls();
+    edges_rad_canvas_1 = edges_rad_max;
+    edges_rad_canvas_2 = edges_rad_max;
     
     //canvas.onmousedown = function(e) { onCanvasMouseDown(canvas, e); };
     //canvas.onmousemove = function(e) { onCanvasMouseMove(canvas, e); };
     //canvas.onmouseup = function(e) { onCanvasMouseUp(canvas, e); };
     //canvas.onwheel = function(e) { onCanvasMouseWheel(canvas, e); };
 
-    edges_rad_canvas_1 = edges_rad_max;
-    edges_rad_canvas_2 = edges_rad_max;
     animate();
 }
 
 
 function resizeCanvas(canvas)
 {
-    xMax = canvas.width  = window.innerWidth * 0.6;
+    canvas_width_old = canvas.width;
+    canvas_height_old = canvas.height;
+    xMax = canvas.width  = window.innerWidth * 0.55 + 100;
     yMax = canvas.height = window.innerHeight * 0.75;
-    zoom_scale_x = zoom_scale_x * canvas.width / canvas_width;
-    zoom_scale_y = zoom_scale_y * canvas.height  / canvas_height; 
-    edges_rad_max = min(zoom_scale_x, zoom_scale_y) * edge_rad_standart;
-    recordinate_edges();
+    zoom_scale_x = canvas.width / canvas_width_old;
+    zoom_scale_y = canvas.height  / canvas_height_old; 
+    edges_rad_max = zoom_scale_x ** 0.5 * edge_rad_standart;
 }
+
+
+
 window.addEventListener('resize', function(){
     console.log(window.outerWidth, window.outerHeight)
     resizeCanvas(canvas_1);
     resizeCanvas(canvas_2);
+    recordinate_edges();
 });
 
 function recordinate_edges(){
-    for (let i = 0; i < edges_positions_canvas_1.length; i++){
-        edges_positions_canvas_1[i].x = edges_positions_canvas_1[i].x * zoom_scale_x;
-        edges_positions_canvas_1[i].y = edges_positions_canvas_1[i].y * zoom_scale_y;
+    engine = Engine.create();
+    engine.world.gravity.y = 0; 
+    let old_edges_canvas_1 = [];
+    edges_bodies_canvas_1.forEach(body => {old_edges_canvas_1.push(body);});
+    edges_positions_canvas_1 = [];
+    edges_bodies_canvas_1 = [];
+    for (let i = 0; i < old_edges_canvas_1.length; i++){
+        old_body_canvas1({x: old_edges_canvas_1[i].position.x * zoom_scale_x,
+        y: old_edges_canvas_1[i].position.y * zoom_scale_y,}, old_edges_canvas_1[i].velocity)
     }
+    spawn_walls();
     for (let i = 0; i < edges_canvas_2.length; i++){
         edges_canvas_2[i].x = edges_canvas_2[i].x * zoom_scale_x;
         edges_canvas_2[i].y = edges_canvas_2[i].y * zoom_scale_y;
     }
+    ctx_2.clearRect(0, 0, canvas_2.width, canvas_2.height);
+    drew_edges(ctx_2, edges_canvas_2, edges_rad_canvas_2)
 }
 
 
 function spawn_walls(){
+    Matter.World.remove(engine.world, walls);
     var ground = Bodies.rectangle(0, canvas_1.height + 10, 5000, 20, { isStatic: true });
     var wall1 = Bodies.rectangle(-10, 0, 20, 2000, { isStatic: true });
     var wall2 = Bodies.rectangle(0, -10, 5000, 20, { isStatic: true });
     var wall3 = Bodies.rectangle(canvas_1.width + 10, 0, 20, 2000, { isStatic: true });
-    Composite.add(engine.world, [ground, wall1, wall2, wall3]);
+    walls = [ground, wall1, wall2, wall3];
+    Composite.add(engine.world, walls);
 }
+
 
 function drew(ctx, point, rad){
     ctx.fillStyle = "red";
@@ -105,6 +123,16 @@ function drew_segments(ctx, segm){
     ctx.beginPath();
     ctx.moveTo(segm.start.x, segm.start.y);
     ctx.lineTo(segm.end.x, segm.end.y);
+    ctx.strokeStyle = "#0bceaf"; 
+    ctx.stroke();
+}
+
+function drew_triangle(ctx, triangle){
+    ctx.beginPath();
+    ctx.moveTo(triangle.points[0].x, triangle.points[0].y);
+    ctx.lineTo(triangle.points[1].x, triangle.points[1].y);
+    ctx.lineTo(triangle.points[2].x, triangle.points[2].y);
+    ctx.lineTo(triangle.points[0].x, triangle.points[0].y);
     ctx.strokeStyle = "#0bceaf"; 
     ctx.stroke();
 }
@@ -135,23 +163,38 @@ function check_cords(cords, edges, rad){
 function new_edge_canvas1(event) {
     mouse = getMousePos(canvas_1, event);
     if (check_cords(mouse, edges_positions_canvas_1, edges_rad_canvas_1)){
-        let body =  Bodies.circle(mouse.x, 
-                                mouse.y, 
-                                edges_rad_canvas_1, 
-                                {
-                                    inertia: Infinity,
-                                    frictionStatic: 1,
-                                    restitution: 1,
-                                    frictionAir: 0,
-                                    friction: 0,
-                                });
-        edges_bodies_canvas_1.push(body);
-        Composite.add(engine.world, body);
-        let angel = Math.random() * 2 * Math.PI;
-        Matter.Body.setVelocity(body, {x: speed * Math.cos(angel), y: speed * Math.sin(angel),});
-        edges_positions_canvas_1.push(body.position);
-    };
+        new_body_canvas1(mouse);
+    }
 };
+
+function new_body_canvas1(mouse){
+    let body = create_body_canvas_1(mouse);
+    let angel = Math.random() * 2 * Math.PI;
+    Matter.Body.setVelocity(body, {x: speed * Math.cos(angel), y: speed * Math.sin(angel),});
+    edges_positions_canvas_1.push(body.position);
+}
+
+function old_body_canvas1(mouse, velocity){
+    let body = create_body_canvas_1(mouse);
+    Matter.Body.setVelocity(body, velocity);
+    edges_positions_canvas_1.push(body.position);
+}
+
+function create_body_canvas_1(mouse){
+    let body =  Bodies.circle(mouse.x, 
+                            mouse.y, 
+                            edges_rad_canvas_1, 
+                            {
+                            inertia: Infinity,
+                            frictionStatic: 1,
+                            restitution: 1,
+                            frictionAir: 0,
+                            friction: 0,
+                        });
+    edges_bodies_canvas_1.push(body);
+    Composite.add(engine.world, body);
+    return body;
+}
 
 function new_edge_canvas2(event) {
     mouse = getMousePos(canvas_2, event);
@@ -222,5 +265,21 @@ function voronoi(){
             drew_segments(ctx_2, segments[i]);
         }
     }
+
+}
+
+function delone(){
+    ctx_2.clearRect(0, 0, canvas_2.width, canvas_2.height);
+    drew_edges(ctx_2, edges_canvas_2, edges_rad_canvas_2);
+    let tri = new Triangulation(xMax, yMax);
+    edges_canvas_2.forEach(edge =>{
+        tri.add_point(edge);
+    })
+    tri.chop(xMax, yMax);
+    tri.triangles.forEach(triangle=> {
+        drew_triangle(ctx_2, triangle);
+    })
+    drew_edges(ctx_2, edges_canvas_2, edges_rad_canvas_2);
+
 
 }
