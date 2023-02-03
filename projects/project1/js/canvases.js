@@ -11,7 +11,6 @@ var points_rad_canvas_2;
 var points_rad_canvas_3;
 
 var render;
-var anim_cooldown;
 var Engine = Matter.Engine,
     Runner = Matter.Runner,
     Bodies = Matter.Bodies,
@@ -24,6 +23,11 @@ var speed;
 var voronoi_on;
 var delone_on;
 
+var tri;
+var cash;
+var then;
+var now;
+var anim_length;
 
 var points_positions_canvas_1 = [];
 var points_canvas_2 = [];
@@ -38,6 +42,10 @@ var canvases = [canvas_1, canvas_2, canvas_3];
 const ctx_1 = canvas_1.getContext("2d");
 const ctx_2 = canvas_2.getContext("2d");
 const ctx_3 = canvas_3.getContext("2d");
+
+
+var anim_cooldown = 3000.0;
+var anime_on = false;
 
 var xMax;
 var yMax;
@@ -58,7 +66,6 @@ window.onload = function(){
     engine = Engine.create();
     engine.world.gravity.y = 0; 
     
-    anim_cooldown = 1000.0;
     
     speed = 10;
     voronoi_on = true;
@@ -133,32 +140,39 @@ function spawn_walls(){
 }
 
 
-function drew(ctx, point, rad){
-    ctx.fillStyle = "red";
+function drew_point(ctx, point, rad, color = "red"){
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(point.x, point.y, rad, 0, Math.PI * 2)
     ctx.stroke();
     ctx.fill();
 }
 
-function drew_segments(ctx, segm){
+
+function drew_segments(ctx, segm, color ="#0bceaf" ){
     ctx.beginPath();
     ctx.moveTo(segm.start.x, segm.start.y);
     ctx.lineTo(segm.end.x, segm.end.y);
-    ctx.strokeStyle = "#0bceaf"; 
+    ctx.strokeStyle = color; 
     ctx.stroke();
 }
 
-function drew_triangle(ctx, triangle){
+function drew_triangle(ctx, triangle, color = "#0bceaf"){
     ctx.beginPath();
     ctx.moveTo(triangle.points[0].x, triangle.points[0].y);
     ctx.lineTo(triangle.points[1].x, triangle.points[1].y);
     ctx.lineTo(triangle.points[2].x, triangle.points[2].y);
     ctx.lineTo(triangle.points[0].x, triangle.points[0].y);
-    ctx.strokeStyle = "#0bceaf"; 
+    ctx.strokeStyle = color; 
     ctx.stroke();
 }
 
+function drew_circle(ctx, circle, color){
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(circle.center.x, circle.center.y, circle.rad, 0, Math.PI * 2)
+    ctx.stroke();
+}
 
 
 function getMousePos(canvas, event) {
@@ -222,14 +236,14 @@ function new_point_canvas_static(event, canvas, ctx, points, rad) {
     mouse = getMousePos(canvas, event);
     if (check_cords(mouse, points, rad)){
         points.push({x:mouse.x, y:mouse.y});
-        drew(ctx, mouse, rad);
+        drew_point(ctx, mouse, rad);
     };
 };
 
 
 function drew_points(ctx, points, rad){
     for (let i = 0; i < points.length; i++){
-        drew(ctx, points[i], rad);
+        drew_point(ctx, points[i], rad);
     };
 };
 
@@ -259,7 +273,7 @@ function voronoi_canvas_1(){
     }
 }
 function delone_canvas_1(){
-    let tri = new Triangulation(xMax, yMax);
+    tri = new Triangulation(xMax, yMax);
     points_positions_canvas_1.forEach(point =>{
         tri.add_point(point);
     })
@@ -310,7 +324,7 @@ function voronoi(){
 function delone(){
     ctx_2.clearRect(0, 0, canvas_2.width, canvas_2.height);
     drew_points(ctx_2, points_canvas_2, points_rad_canvas_2);
-    let tri = new Triangulation(xMax, yMax);
+    tri = new Triangulation(xMax, yMax);
     points_canvas_2.forEach(point =>{
         tri.add_point(point);
     })
@@ -320,3 +334,24 @@ function delone(){
     })
     drew_points(ctx_2, points_canvas_2, points_rad_canvas_2);
 }
+
+function start_delone_animation(){
+    cashe = [...points_canvas_3];
+    anim_length = cashe.length + 1;
+    tri = new Triangulation_anim(xMax, yMax, points_rad_canvas_3);
+    then = Date.now();
+    anime_on = true;
+    delone_anim();
+}
+
+function delone_anim(){
+    now = Date.now();
+    let elapsed = now - then;
+    if (elapsed > anim_cooldown){
+        anime_on = tri.anim(ctx_3, cashe, points_canvas_3, xMax, yMax);
+        then = now;
+    }
+    if (anime_on){requestAnimationFrame(delone_anim);}
+    else{ctx_3.clearRect(0, 0, xMax, yMax) ;tri.triangles.forEach(triangle=> {drew_triangle(ctx_3, triangle, "green");}) ;drew_points(ctx_3, points_canvas_3, points_rad_canvas_3);}
+}
+
