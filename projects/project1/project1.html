@@ -62,12 +62,12 @@
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
-                    <canvas id="canvas_1" class="canvas" onclick="new_point_canvas1(event)" ></canvas>
+                    <canvas id="canvas_1" class="canvas" onclick="new_point_canvas_1(event)" ></canvas>
                 </div>
                 <div>
-                    <a class="btn btn-outline-primary d-lg-block canvas_button" onclick="clear_points_canvas1()">Clear points</a>
-                    <a class="btn btn-outline-primary d-lg-block canvas_button" onclick="turn_voronoi()">Voronoi</a>
-                    <a class="btn btn-outline-primary d-lg-block canvas_button" onclick="turn_delone()">Delone</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_1_clear" >Clear points</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_1_voronoi">Voronoi</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_1_delone">Delone</a>
                 </div>
             </div>
             <div class="row align-items-center justify-content-center py-5">
@@ -75,20 +75,28 @@
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
-                    <canvas id="canvas_2" class="canvas" onclick="new_point_canvas_static(event, canvas_2, ctx_2, points_canvas_2, points_rad_canvas_2)" ></canvas>
+                    <canvas id="canvas_2" class="canvas" onclick="new_point_canvas_static(event, canvas_2)" ></canvas>
                 </div>
                 <div>
-                    <a class="btn btn-outline-primary d-lg-block canvas_button" onclick="clear_points_canvas_2()">Clear points</a>
-                    <a class="btn btn-outline-primary d-lg-block canvas_button" onclick="voronoi()">Voronoi</a>
-                    <a class="btn btn-outline-primary d-lg-block canvas_button" onclick="delone()">Delone</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_2_clear">Clear points</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_2_voronoi">Voronoi</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_2_delone">Delone</a>
                 </div>
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
-                    <canvas id="canvas_3" class="canvas" onclick="new_point_canvas_static(event, canvas_3, ctx_3, points_canvas_3, points_rad_canvas_3)" ></canvas>
+                    <canvas id="canvas_3" class="canvas" onclick="new_point_canvas_static(event, canvas_3)" ></canvas>
                 </div>
                 <div>
-                    <a class="btn btn-outline-primary d-lg-block canvas_button" onclick="start_delone_animation()">Delone animation</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_3_delone" >Delone animation</a>
+                </div>
+            </div>
+            <div class="row align-items-center">
+                <div class="canvas_1_box">
+                    <canvas id="canvas_4" class="canvas" onclick="new_point_canvas_static(event, canvas_4)" ></canvas>
+                </div>
+                <div>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_4_voronoi" >animation</a>
                 </div>
             </div>
         </div>
@@ -282,6 +290,9 @@
     <script src="js/Delone.js"></script>
     <script src="js/geom_classes.js"></script>
     <script src="js/animation_delone.js"></script>
+    <script src="js/aditional_classes.js"></script>
+    <script src="js/drew.js"></script>
+    <script src="js/animation_voronoi.js"></script>
 </body>
 
 </html>

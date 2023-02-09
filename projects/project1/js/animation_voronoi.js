@@ -1,15 +1,12 @@
-class VoronoiDiagram {
-	/**
-	 * Creates an instance of the Voronoi diagram builder
-	 * @param {[Point]} points - List of Points objects p having x and y coordinate p.x and p.y
-	 * @param {float} width - Width of the canvas
-	 * @param {float} height - Height of the canvas
-	 */
-	constructor(points, width, height) {
+
+class VoronoiDiagram_anim {
+
+	constructor(points, width, height, ctx) {
 		this.point_list = points;
 		this.reset();
 		this.box_x = width;
 		this.box_y = height;
+        this.ctx = ctx;
 	}
 
 	reset() {
@@ -19,39 +16,41 @@ class VoronoiDiagram {
 		this.edges = [];
 	}
 
-	/**
-	 * Builds the Voronoi diagram computing the Voroni vertices and edges
-	 */
-	update() {
+	update_start() {
 		this.reset();
 		let points = [];
-		let e = null;
 		for (const p of this.point_list) points.push(new Event("point", p));
 		this.event_list.points = points;
+        return true;
+	}
 
-		while (this.event_list.length > 0) {
+    update(){
+		var e = null;
+		if (this.event_list.length > 0) {
 			e = this.event_list.extract_first();
 			if (e.type == "point") this.point_event(e.position);
 			else if (e.active) this.circle_event(e);
-			// last_event = e.position;
 		}
-		this.complete_segments(e.position);
-	}
+        else if (e!= null){this.complete_segments(e.position); return false;}
+        return true;
+    }
 
-	/**
-	 * Handles the Point Events
-	 * @param {Point} p - a point object that must have coordinates p.x and p.y
-	 */
 	point_event(p) {
+		drew_line(this.ctx, [new Point(0, p.y), new Point(this.box_x, p.y)], "grey");
 		let q = this.beachline_root;
-		if (q == null) this.beachline_root = new Arc(null, null, p, null, null);
+		let q_prev = null;
+		if (q == null) {this.beachline_root = new Arc(null, null, p, null, null);}
 		else {
 			while (
 				q.right != null &&
 				this.parabola_intersection(p.y, q.focus, q.right.focus) <= p.x
 			) {
+				drew_left_arc(this.ctx, p.y, q, q_prev);
+				q_prev = q;
 				q = q.right;
+				drew_arc(this.ctx, p.y, q, q_prev);
 			}
+			this.edges.forEach(edge=> {if (edge.start != null && edge.end != null){drew_segments(this.ctx, edge, "green");}})	
 
 			// if(q === this.beachline_root && q.focus.y == p.y) xx = (q.focus.x + p.x)/2 // edge case when the two top sites have same y
 			let e_qp = new Edge(q.focus, p, p.x);
@@ -141,14 +140,6 @@ class VoronoiDiagram {
 		}
 	}
 
-	// Input: float, Point, Point
-	/**
-	 * Computes the intersection of two parabolas given the directrix
-	 * @param {float} y - position of the directrix (sweepline)
-	 * @param {Point} f1 - Focus of first parabola
-	 * @param {Point} f2 - Focus of second parabola
-	 * @returns	{float} Intersection x-coordinate
-	 */
 	parabola_intersection(y, f1, f2) {
 		let fyDiff = f1.y - f2.y;
 		if (fyDiff == 0) return (f1.x + f2.x) / 2;
@@ -248,25 +239,27 @@ class VoronoiDiagram {
 		}
 	}
 
-	/**
-	 * Computes the intersection point between an edge and the canvas bounding box
-	 * @param {Edge} e - Edge being completed
-	 * @param {float} y_lim - Either 0 or y limit of the canvas
-	 */
 	edge_end(e, y_lim) {
 		let x = Math.min(this.box_x, Math.max(0, e.getX(y_lim)));
 		let y = e.getY(x);
-		if (!y) y = y_lim; // In this case the edge is vertical
+		if (!y) y = y_lim; 
 		let p = new Point(x, y);
 		this.voronoi_vertex.push(p);
 		return p;
 	}
 
-	/**
-	 * Tests if a point is outside the canvas bounding box
-	 * @param {Point} p - Point tested
-	 */
 	point_outside(p) {
 		return p.x < 0 || p.x > this.box_x || p.y < 0 || p.y > this.box_y;
 	}
+}
+
+function parab_intersect(y, f1, f2) {
+	let fyDiff = f1.y - f2.y;
+	if (fyDiff == 0) return (f1.x + f2.x) / 2;
+	let fxDiff = f1.x - f2.x;
+	let b1md = f1.y - y; //Difference btw parabola 1 fy and directrix
+	let b2md = f2.y - y; //Difference btw parabola 2 fy and directrix
+	let h1 = (-f1.x * b2md + f2.x * b1md) / fyDiff;
+	let h2 = Math.sqrt(b1md * b2md * (fxDiff ** 2 + fyDiff ** 2)) / fyDiff;
+	return h1 + h2; //Returning the left x coord of intersection. Remember top of canvas is 0 hence parabolas are facing down
 }
