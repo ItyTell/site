@@ -60,7 +60,6 @@ class Triangulation_anim{
             if (index > 0){drew_circle(ctx, this.triangles[this.step].circle);}
             else {if (this.bed_triangles.length + index > 0){drew_triangle(ctx, this.bed_triangles[-index], "red");drew_circle(ctx, this.bed_triangles[-index].circle);} else {this.etap = 2;}}
             this.step += 1;
-            console.log("step =", this.step);
             drew_points(ctx, all_points, this.rad);
             drew_point(ctx, this.point, this.rad, "green");
             return true;
@@ -80,7 +79,6 @@ class Triangulation_anim{
             drew_point(ctx, this.point, this.rad, "green");
             return false;
         }
-        console.log(this.etap);
         return true;
     }
 

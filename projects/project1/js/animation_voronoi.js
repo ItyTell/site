@@ -7,13 +7,17 @@ class VoronoiDiagram_anim {
 		this.box_x = width;
 		this.box_y = height;
         this.ctx = ctx;
+		this.y = 0;
 	}
 
 	reset() {
 		this.event_list = new SortedQueue();
 		this.beachline_root = null;
+		this.beachline_root = new Arc(null, null, new Point(-10000, -10000), null, null);
 		this.voronoi_vertex = [];
 		this.edges = [];
+		this.e = null;
+		this.y = 0;
 	}
 
 	update_start() {
@@ -21,36 +25,44 @@ class VoronoiDiagram_anim {
 		let points = [];
 		for (const p of this.point_list) points.push(new Event("point", p));
 		this.event_list.points = points;
+		this.e = this.event_list.extract_first();
         return true;
 	}
 
     update(){
-		var e = null;
+		let speed = 1 / 4;
+		if (Math.abs(this.y - this.e.position.y) > speed){this.drew(new Point (0, this.y)); this.y += speed; return true;}
 		if (this.event_list.length > 0) {
-			e = this.event_list.extract_first();
-			if (e.type == "point") this.point_event(e.position);
-			else if (e.active) this.circle_event(e);
+			this.drew(this.e.position);
+			if (this.e.type == "point") this.point_event(this.e.position);
+			else {if (this.e.active) {this.circle_event(this.e);}}
+			this.e = this.event_list.extract_first();
+			this.y += speed;
 		}
-        else if (e!= null){this.complete_segments(e.position); return false;}
+        else {this.complete_segments(this.e.position); return false;}
         return true;
     }
 
-	point_event(p) {
+	drew(p){
 		drew_line(this.ctx, [new Point(0, p.y), new Point(this.box_x, p.y)], "grey");
 		let q = this.beachline_root;
-		let q_prev = null;
+		while(q != null){
+			drew_arc(this.ctx, p.y, q, "red");
+			q = q.right; 
+		}
+		this.edges.forEach(edge=> {if (edge.start != null && edge.end != null){drew_segments(this.ctx, edge, "green");}})	
+	}
+
+	point_event(p) {
+		let q = this.beachline_root;
 		if (q == null) {this.beachline_root = new Arc(null, null, p, null, null);}
 		else {
 			while (
 				q.right != null &&
 				this.parabola_intersection(p.y, q.focus, q.right.focus) <= p.x
 			) {
-				drew_left_arc(this.ctx, p.y, q, q_prev);
-				q_prev = q;
 				q = q.right;
-				drew_arc(this.ctx, p.y, q, q_prev);
 			}
-			this.edges.forEach(edge=> {if (edge.start != null && edge.end != null){drew_segments(this.ctx, edge, "green");}})	
 
 			// if(q === this.beachline_root && q.focus.y == p.y) xx = (q.focus.x + p.x)/2 // edge case when the two top sites have same y
 			let e_qp = new Edge(q.focus, p, p.x);

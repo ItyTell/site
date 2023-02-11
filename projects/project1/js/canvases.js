@@ -1,8 +1,3 @@
-var canvas_width_old;
-var canvas_height_old;
-var zoom_scale_x;
-var zoom_scale_y;
-
 
 class Canvas {
     constructor(id){
@@ -18,38 +13,35 @@ class Canvas {
 
 }
 
+var canvas_width_old;
+var canvas_height_old;
+var zoom_scale_x;
+var zoom_scale_y;
 var render;
 var Engine = Matter.Engine,
     Runner = Matter.Runner,
     Bodies = Matter.Bodies,
     Composite = Matter.Composite;
-
-
 var engine;
-
 var speed;
 var voronoi_on;
 var delone_on;
 var vor_anim;
-
 var tri;
 var cash;
 var then;
 var now;
 var anim_length;
-
 var points_bodies_canvas_1 = [];
 var walls = [];
-
 var canvas_1 = new Canvas("canvas_1");
 var canvas_2 = new Canvas("canvas_2");
 var canvas_3 = new Canvas("canvas_3");
 var canvas_4 = new Canvas("canvas_4");
-var canvases = [canvas_1, canvas_2, canvas_3, canvas_4];
-
-var anim_cooldown = 3000.0;
+var canvas_5 = new Canvas("canvas_5")
+var canvases = [canvas_1, canvas_2, canvas_3, canvas_4, canvas_5];
+var anim_cooldown = 30.0;
 var anime_on = false;
-
 var xMax;
 var yMax;
 
@@ -63,18 +55,18 @@ window.onload = function(){
     canvas_height_old = 527;
     zoom_scale_x = 1;
     zoom_scale_y = 1;
-
-    render = 1000.0/30.0; //fps
     engine = Engine.create();
     engine.world.gravity.y = 0; 
-    
     speed = 10;
     voronoi_on = true;
     delone_on = false;
     canvases.forEach(canvas=> {resizeCanvas(canvas.cnv);})
     recordinate_points();
-    spawn_walls();
     animate();
+    
+    canvas_5.points.push({x:150, y: 200});drew_point(canvas_5.ctx, new Point(150, 200), canvas_5.rad);
+    canvas_5.points.push({x: 300,y: 250});drew_point(canvas_5.ctx, new Point(300, 250), canvas_5.rad);
+    
 }
 
 
@@ -88,12 +80,7 @@ function resizeCanvas(canvas)
     zoom_scale_y = canvas.height  / canvas_height_old; 
 }
 
-
-
-window.addEventListener('resize', function(){
-    canvases.forEach(canvas=> {resizeCanvas(canvas.cnv);})
-    recordinate_points();
-});
+window.addEventListener('resize', function(){canvases.forEach(canvas=> {resizeCanvas(canvas.cnv);});recordinate_points();});
 
 function recordinate_points(){
     engine = Engine.create();
@@ -128,7 +115,6 @@ function spawn_walls(){
     Composite.add(engine.world, walls);
 }
 
-
 function getMousePos(canvas, event) {
   var rect = canvas.getBoundingClientRect();
   return {
@@ -137,11 +123,9 @@ function getMousePos(canvas, event) {
   };
 };
 
-
 function check_cords(cords, points, rad){
     if ((cords.x - rad < 0) || (cords.y - rad < 0)){return false;}
     if ((cords.x + rad > xMax) || (cords.y + rad > yMax)){return false;}
-
     for (let i = 0; i < points.length; i++){
         if (Math.pow(cords.x - points[i].x, 2) + Math.pow(cords.y - points[i].y, 2) < 4 * rad * rad){
             return false;
@@ -152,9 +136,7 @@ function check_cords(cords, points, rad){
 
 function new_point_canvas_1(event) {
     mouse = getMousePos(canvas_1.cnv, event);
-    if (check_cords(mouse, canvas_1.points, canvas_1.rad)){
-        new_body_canvas_1(mouse);
-    }
+    if (check_cords(mouse, canvas_1.points, canvas_1.rad)){new_body_canvas_1(mouse);}
 };
 
 function new_body_canvas_1(mouse){
@@ -189,11 +171,9 @@ function create_body_canvas_1(mouse){
 function new_point_canvas_static(event, canvas) {
     mouse = getMousePos(canvas.cnv, event);
     if (check_cords(mouse, canvas.points, canvas.rad)){
-        canvas.points.push({x:mouse.x, y:mouse.y});
-        drew_point(canvas.ctx, mouse, canvas.rad);
+        canvas.points.push({x:mouse.x, y:mouse.y});drew_point(canvas.ctx, mouse, canvas.rad);
     };
 };
-
 
 function clear_points_canvas_1(){
     canvas_1.ctx.clearRect(0, 0, canvas_1.cnv.width, canvas_1.cnv.height);
@@ -204,34 +184,19 @@ function clear_points_canvas_1(){
     points_bodies_canvas_1 = [];
 }
 
-function clear_points(canvas){
-    canvas.ctx.clearRect(0, 0, canvas.cnv.width, canvas.cnv.height);
-    canvas.points = [];
-}
-
+function clear_points(canvas){canvas.ctx.clearRect(0, 0, canvas.cnv.width, canvas.cnv.height);canvas.points = [];}
 
 function animate(){
     canvas_1.ctx.clearRect(0, 0, canvas_1.cnv.width, canvas_1.cnv.height);
-    if (voronoi_on){
-        voronoi(canvas_1);
-    };
-    if (delone_on){
-        delone(canvas_1);
-    };
+    if (voronoi_on){voronoi(canvas_1);};
+    if (delone_on){delone(canvas_1);};
     canvas_1.drew_points();
     requestAnimationFrame(animate);
     Engine.update(engine, render);
 }
 
-
-function turn_voronoi(){
-    voronoi_on = !voronoi_on;
-}
-
-function turn_delone(){
-    delone_on = !delone_on;
-}
-
+function turn_voronoi(){voronoi_on = !voronoi_on;}
+function turn_delone(){delone_on = !delone_on;}
 function clear_edges(canvas){canvas.ctx.clearRect(0, 0, canvas.cnv.width, canvas.cnv.height); canvas.drew_points();}
 
 function voronoi(canvas){
@@ -278,7 +243,6 @@ function delone_anim(){
     else{canvas_3.ctx.clearRect(0, 0, xMax, yMax) ;tri.triangles.forEach(triangle=> {drew_triangle(canvas_3.ctx, triangle, "green");}) ;canvas_3.drew_points();}
 }
 
-
 function start_voronoi(){
     then = Date.now();
     vor_anim = new VoronoiDiagram_anim(canvas_4.points, canvas_4.cnv.width, canvas_4.cnv.height, canvas_4.ctx);
@@ -297,9 +261,38 @@ function voronoi_anim(){
         then = now;
     }
     if (anime_on){requestAnimationFrame(voronoi_anim);}
-    else{canvas_4.ctx.clearRect(0, 0, xMax, yMax);}
+    else{canvas_4.ctx.clearRect(0, 0, xMax, yMax);canvas_4.drew_points(); 
+		vor_anim.edges.forEach(edge=> {if (edge != null){drew_segments(canvas_4.ctx, edge, "green");}})}	
 }
 
+
+function arcs_move(event){
+    canvas_5.ctx.clearRect(0, 0, canvas_5.cnv.width, canvas_5.cnv.height);
+    mouse = getMousePos(canvas_5.cnv, event);
+    let y = mouse.y;
+    let k = 10000;
+    let point_1 = canvas_5.points[0];
+    let ctx = canvas_5.ctx;
+    let d = (-point_1.y + y) / 2;
+    let point_2 = canvas_5.points[1];
+    let d_2 = (-point_2.y + y) / 2;
+    let x = parab_intersect(y, point_1, point_2);
+
+    drew_line(ctx, [new Point(0, y), new Point(xMax, y)], "grey");
+    
+    ctx.beginPath();
+    ctx.moveTo(point_1.x - k, y - d - (k**2) / (2 * d));
+    ctx.quadraticCurveTo(point_1.x - k / 2, y - d, point_1.x, y - d);
+    ctx.quadraticCurveTo(point_1.x / 2 + x / 2, y - d, x, y - d - ((x - point_1.x)**2) / (2 * d));
+
+
+    ctx.quadraticCurveTo(point_2.x / 2 + x / 2, y - d_2, point_2.x, y - d_2);
+    ctx.quadraticCurveTo(point_2.x + k / 2, y - d_2, point_2.x + k, y - d_2 - (k**2) / (2 * d));
+    
+    ctx.strokeStyle = "red";
+    ctx.stroke();
+    canvas_5.drew_points();
+}
 
 
 document.getElementById("canvas_1_clear").onclick = function(){clear_points_canvas_1();}
@@ -315,3 +308,6 @@ document.getElementById("canvas_3_delone").onclick = function(){start_delone_ani
 
 
 document.getElementById("canvas_4_voronoi").onclick = function(){start_voronoi();}
+
+
+canvas_5.cnv.addEventListener('mousemove', (event) => {arcs_move(event);});

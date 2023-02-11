@@ -32,26 +32,25 @@ function drew_segments(ctx, segm, color ="#0bceaf" ){
     ctx.stroke();
 }
 
-function drew_left_arc(ctx, y, arc, q_prev){
-    if (arc.event == false){return;}
-    let d = (-arc.focus.y + y) / 2;
-    if (q_prev == null){ctx.moveTo(arc.focus.x - 10000, arc.focus.y + d - 100000000); ctx.quadraticCurveTo(arc.focus.x - 5000, arc.focus.y + d, arc.focus.x, arc.focus.y + d); ctx.strokeStyle = 'red'; ctx.stroke(); return;}
-    let x_col = parab_intersect(y, arc, q_prev);
-    ctx.moveTo(x_col, arc.focus.y + d - ((-x_col + arc.focus.x)/(2 * d))**2);
-    ctx.quadraticCurveTo(arc.focus.x / 2 + x_col / 2, arc.focus.y + d, arc.focus.x, arc.focus.y + d);
-    ctx.strokeStyle = "red";
-    ctx.stroke();
-}
 
+function drew_arc(ctx, y, arc, color = "red"){
+    let k = 10000;    
+    let d = (y - arc.focus.y) / 2;    
+    let x1; let x2; let y1; let y2;
+    let x3; let x4; let y3; let y4;
 
-function drew_arc(ctx, y, arc, q_prev, color = "red"){
-    if (arc.event == false){return;}
-    let d_prev = (-q_prev.focus.y + y) / 2;
-    let d = (-arc.focus.y + y) / 2;
-    let x_col = parab_intersect(y, arc, q_prev);
-    ctx.moveTo(q_prev.focus.x, q_prev.focus.y + d_prev)
-    ctx.quadraticCurveTo(x_col / 2 + q_prev.focus.x / 2, q_prev.focus.y + d_prev, x_col, q_prev.focus.y + d_prev - ((x_col - q_prev.focus.x)/(2 * d_prev)) ** 2);
-    ctx.quadraticCurveTo(arc.focus.x / 2 + x_col / 2, arc.focus.y + d, arc.focus.x, arc.focus.y + d_prev);
+    if (arc.left == null){x1 = k;}
+    else {x1 = arc.focus.x - parab_intersect(y, arc.left.focus, arc.focus);
+        drew_line(ctx, [arc.edge.left.start, new Point(arc.focus.x - x1, y - d - (x1 * x1) / (4 * d))], "black");}
+    
+    ctx.beginPath();
+    y1 = (x1 * x1) / (4 * d);
+    ctx.moveTo(arc.focus.x - x1, y - d - y1);
+    ctx.quadraticCurveTo(arc.focus.x - x1 / 2, y - d, arc.focus.x, y - d);
+    
+    if (arc.right == null){ctx.quadraticCurveTo(arc.focus.x + k / 2, y - d, arc.focus.x + k, y - d - (k**2) / (4 * d));}
+    else {let x = parab_intersect(y, arc.focus, arc.right.focus);
+        ctx.quadraticCurveTo(arc.focus.x / 2 + x / 2, y - d, x, y - d - ((x - arc.focus.x) ** 2) / (4 * d));}
     ctx.strokeStyle = color;
     ctx.stroke();
 }
