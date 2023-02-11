@@ -37,20 +37,20 @@ function drew_arc(ctx, y, arc, color = "red"){
     let k = 10000;    
     let d = (y - arc.focus.y) / 2;    
     let x1; let x2; let y1; let y2;
-    let x3; let x4; let y3; let y4;
 
-    if (arc.left == null){x1 = k;}
-    else {x1 = arc.focus.x - parab_intersect(y, arc.left.focus, arc.focus);
-        drew_line(ctx, [arc.edge.left.start, new Point(arc.focus.x - x1, y - d - (x1 * x1) / (4 * d))], "black");}
+    x1 = -k;
+    if (arc.left != null){x1 = parab_intersect(y, arc.left.focus, arc.focus) - arc.focus.x;
+        drew_line(ctx, [arc.edge.left.start, new Point(arc.focus.x + x1, y - d - (x1 * x1) / (4 * d))], "black");}
     
-    ctx.beginPath();
     y1 = (x1 * x1) / (4 * d);
-    ctx.moveTo(arc.focus.x - x1, y - d - y1);
-    ctx.quadraticCurveTo(arc.focus.x - x1 / 2, y - d, arc.focus.x, y - d);
-    
-    if (arc.right == null){ctx.quadraticCurveTo(arc.focus.x + k / 2, y - d, arc.focus.x + k, y - d - (k**2) / (4 * d));}
-    else {let x = parab_intersect(y, arc.focus, arc.right.focus);
-        ctx.quadraticCurveTo(arc.focus.x / 2 + x / 2, y - d, x, y - d - ((x - arc.focus.x) ** 2) / (4 * d));}
+    ctx.beginPath();
+    ctx.moveTo(arc.focus.x + x1, y - d - y1);
+    x2 = k;
+    if (arc.right != null){
+        x2 = parab_intersect(y, arc.focus, arc.right.focus) - arc.focus.x;
+    }
+    y2 = (x2 * x2) / (4 * d);
+    ctx.quadraticCurveTo(arc.focus.x + x1 / 2 + x2 / 2, y - d + (y1 * y2) ** 0.5, arc.focus.x + x2, y - d - y2);
     ctx.strokeStyle = color;
     ctx.stroke();
 }
