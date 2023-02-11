@@ -58,7 +58,7 @@
                 <h1 class="position-absolute text-uppercase text-primary">Computational geometry algorithms</h1>
             </div>
             <div class="row align-items-center justify-content-center py-5">
-                <h3 class="mb-4">Forchun method with moving points</h3>
+                <h3 class="mb-4">Voronoi diagram and delone triangulation with moving points</h3>
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
@@ -68,10 +68,11 @@
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_1_clear" >Clear points</a>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_1_voronoi">Voronoi</a>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_1_delone">Delone</a>
+                    <input type="range" class="range" id="canvas_1_rad" name="radius of the points" min="1" max="10">
                 </div>
             </div>
             <div class="row align-items-center justify-content-center py-5">
-                <h3 class="mb-4">Delone triangulation with moving points</h3>
+                <h3 class="mb-4">Voronoi diagram and delone triangulation with static points</h3>
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
@@ -81,7 +82,11 @@
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_2_clear">Clear points</a>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_2_voronoi">Voronoi</a>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_2_delone">Delone</a>
+                    <input type="range" class="range" id="canvas_2_rad" name="radius of the points" min="1" max="10">
                 </div>
+            </div>
+            <div class="row align-items-center justify-content-center py-5">
+                <h3 class="mb-4">Delone triangulation algorithm animation</h3>
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
@@ -89,7 +94,11 @@
                 </div>
                 <div>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_3_delone" >Delone animation</a>
+                    <input type="range" class="range" id="canvas_3_rad" name="radius of the points" min="1" max="10">
                 </div>
+            </div>
+            <div class="row align-items-center justify-content-center py-5">
+                <h3 class="mb-4">Sweeping line algorithm animation</h3>
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
@@ -97,6 +106,7 @@
                 </div>
                 <div>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_4_voronoi" >animation</a>
+                    <input type="range" class="range" id="canvas_4_rad" name="radius of the points" min="1" max="10">
                 </div>
             </div>
             <div class="row align-items-center">

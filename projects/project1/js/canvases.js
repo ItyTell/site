@@ -17,11 +17,11 @@ var canvas_width_old;
 var canvas_height_old;
 var zoom_scale_x;
 var zoom_scale_y;
-var render;
 var Engine = Matter.Engine,
     Runner = Matter.Runner,
     Bodies = Matter.Bodies,
     Composite = Matter.Composite;
+var render;
 var engine;
 var speed;
 var voronoi_on;
@@ -58,6 +58,7 @@ window.onload = function(){
     engine = Engine.create();
     engine.world.gravity.y = 0; 
     speed = 10;
+    render = 1000 / 30
     voronoi_on = true;
     delone_on = false;
     canvases.forEach(canvas=> {resizeCanvas(canvas.cnv);})
@@ -74,7 +75,7 @@ function resizeCanvas(canvas)
 {
     canvas_width_old = canvas.width;
     canvas_height_old = canvas.height;
-    xMax = canvas.width  = window.innerWidth * 0.55 + 100;
+    xMax = canvas.width  = window.innerWidth * 0.5 + 100;
     yMax = canvas.height = window.innerHeight * 0.75;
     zoom_scale_x = canvas.width / canvas_width_old;
     zoom_scale_y = canvas.height  / canvas_height_old; 
@@ -85,7 +86,7 @@ window.addEventListener('resize', function(){canvases.forEach(canvas=> {resizeCa
 function recordinate_points(){
     engine = Engine.create();
     engine.world.gravity.y = 0; 
-    let old_points_canvas_1 = [...canvas_1.points];
+    let old_points_canvas_1 = [...points_bodies_canvas_1];
     canvas_1.points= [];
     points_bodies_canvas_1 = [];
     for (let i = 0; i < old_points_canvas_1.length; i++){
@@ -102,6 +103,20 @@ function recordinate_points(){
         canvas.ctx.clearRect(0, 0, canvas.cnv.width, canvas.cnv.height);
         drew_points(canvas.ctx, canvas.points, canvas.rad);
     })
+}
+
+function new_rad_points(rad){
+    engine = Engine.create();
+    engine.world.gravity.y = 0; 
+    let old_points_canvas_1 = [...points_bodies_canvas_1];
+    canvas_1.points= [];
+    points_bodies_canvas_1 = [];
+    canvas_1.rad = rad;
+    for (let i = 0; i < old_points_canvas_1.length; i++){
+        old_body_canvas_1({x: old_points_canvas_1[i].position.x,
+        y: old_points_canvas_1[i].position.y}, old_points_canvas_1[i].velocity)
+    }
+    spawn_walls();
 }
 
 
@@ -183,6 +198,8 @@ function clear_points_canvas_1(){
     canvas_1.points = [];
     points_bodies_canvas_1 = [];
 }
+
+function redrew_points(canvas){canvas.ctx.clearRect(0, 0, canvas.cnv.width, canvas.cnv.height); canvas.drew_points();}
 
 function clear_points(canvas){canvas.ctx.clearRect(0, 0, canvas.cnv.width, canvas.cnv.height);canvas.points = [];}
 
@@ -299,15 +316,21 @@ document.getElementById("canvas_1_clear").onclick = function(){clear_points_canv
 document.getElementById("canvas_1_voronoi").onclick = function(){turn_voronoi();}
 document.getElementById("canvas_1_delone").onclick = function(){turn_delone();}
 
+document.getElementById("canvas_1_rad").oninput = function(){new_rad_points(this.valueAsNumber);}
+
 document.getElementById("canvas_2_clear").onclick = function(){clear_points(canvas_2);}
 document.getElementById("canvas_2_voronoi").onclick = function(){clear_edges(canvas_2); voronoi(canvas_2)}
 document.getElementById("canvas_2_delone").onclick = function(){clear_edges(canvas_2); delone(canvas_2)}
 
+document.getElementById("canvas_2_rad").oninput = function(){canvas_2.rad = this.valueAsNumber; redrew_points(canvas_2);}
 
 document.getElementById("canvas_3_delone").onclick = function(){start_delone_animation();}
 
+document.getElementById("canvas_3_rad").oninput = function(){canvas_3.rad = this.valueAsNumber; redrew_points(canvas_3);}
 
 document.getElementById("canvas_4_voronoi").onclick = function(){start_voronoi();}
 
+document.getElementById("canvas_4_rad").oninput = function(){canvas_4.rad = this.valueAsNumber; redrew_points(canvas_4);}
 
 canvas_5.cnv.addEventListener('mousemove', (event) => {arcs_move(event);});
+

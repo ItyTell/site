@@ -13,7 +13,6 @@ class VoronoiDiagram_anim {
 	reset() {
 		this.event_list = new SortedQueue();
 		this.beachline_root = null;
-		this.beachline_root = new Arc(null, null, new Point(-10000, -10000), null, null);
 		this.voronoi_vertex = [];
 		this.edges = [];
 		this.e = null;
@@ -85,6 +84,7 @@ class VoronoiDiagram_anim {
 	}
 
 	circle_event(e) {
+		drew_circle(this.ctx, new Circle(e.vertex, e.vertex.distance(e.caller.focus)), "red")
 		let arc = e.caller;
 		let p = e.position;
 		let edge_new = new Edge(arc.left.focus, arc.right.focus);
