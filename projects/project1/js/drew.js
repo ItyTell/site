@@ -32,12 +32,10 @@ function drew_segments(ctx, segm, color ="#0bceaf" ){
     ctx.stroke();
 }
 
-
 function drew_arc(ctx, y, arc, color = "red"){
     let k = 10000;    
     let d = (y - arc.focus.y) / 2;    
     let x1; let x2; let y1; let y2;
-
     x1 = -k;
     if (arc.left != null){x1 = parab_intersect(y, arc.left.focus, arc.focus) - arc.focus.x;
         drew_line(ctx, [arc.edge.left.start, new Point(arc.focus.x + x1, y - d - (x1 * x1) / (4 * d))], "black");}
@@ -50,7 +48,7 @@ function drew_arc(ctx, y, arc, color = "red"){
         x2 = parab_intersect(y, arc.focus, arc.right.focus) - arc.focus.x;
     }
     y2 = (x2 * x2) / (4 * d);
-    ctx.quadraticCurveTo(arc.focus.x + x1 / 2 + x2 / 2, y - d + (y1 * y2) ** 0.5, arc.focus.x + x2, y - d - y2);
+    ctx.quadraticCurveTo(arc.focus.x + x1 / 2 + x2 / 2, y - d + Math.sign(-x1 * x2) * (y1 * y2) ** 0.5, arc.focus.x + x2, y - d - y2);
     ctx.strokeStyle = color;
     ctx.stroke();
 }

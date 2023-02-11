@@ -40,7 +40,7 @@ var canvas_3 = new Canvas("canvas_3");
 var canvas_4 = new Canvas("canvas_4");
 var canvas_5 = new Canvas("canvas_5")
 var canvases = [canvas_1, canvas_2, canvas_3, canvas_4, canvas_5];
-var anim_cooldown = 30.0;
+var anim_cooldown = 10.0;
 var anime_on = false;
 var xMax;
 var yMax;
