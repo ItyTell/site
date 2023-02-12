@@ -2,120 +2,112 @@
 class Canvas {
     constructor(id){
         this.cnv = document.getElementById(id);
-        const ctx = this.cnv.getContext("2d");
-        this.ctx = ctx;
-        this.rad = 3;
+        this.ctx  = this.cnv.getContext("2d");
+        this.rad = document.getElementById(id + "_rad").valueAsNumber;
         this.points = [];
+        this.zoom_scale_x = 1; this.zoom_scale_y = 1; 
+        this.now = 0; this.then = 0;
     }
+
+    clear(){this.ctx.clearRect(0, 0, this.cnv.width, this.cnv.height);}
 
     drew_points(){this.points.forEach(point=>{drew_point(this.ctx, point, this.rad);})}
 
+    check_cords(cords){
+        let flag = true;
+        if ((cords.x - this.rad < 0) || (cords.y - this.rad < 0)){return false;}
+        if ((cords.x + this.rad > this.cnv.width) || (cords.y + this.rad > this.cnv.height)){return false;}
+        this.points.forEach(point=> {if (point.distance(cords) < 2 * this.rad){flag = false}})
+        return flag;
+};
+
 
 }
 
-var canvas_width_old;
-var canvas_height_old;
-var zoom_scale_x;
-var zoom_scale_y;
+var canvas_width_old, canvas_height_old;
+var zoom_scale_x, zoom_scale_y;
+
 var Engine = Matter.Engine,
     Runner = Matter.Runner,
     Bodies = Matter.Bodies,
-    Composite = Matter.Composite;
-var render;
-var engine;
-var speed;
-var voronoi_on;
-var delone_on;
-var vor_anim;
-var tri;
-var cash;
-var then;
-var now;
-var anim_length;
+    Composite = Matter.Composite,
+    render, engine;
+
+var speed, voronoi_on, delone_on;
 var points_bodies_canvas_1 = [];
 var walls = [];
-var canvas_1 = new Canvas("canvas_1");
-var canvas_2 = new Canvas("canvas_2");
-var canvas_3 = new Canvas("canvas_3");
-var canvas_4 = new Canvas("canvas_4");
-var canvas_5 = new Canvas("canvas_5")
+
+var vor_anim;
+var tri, cash;
+var anim_length;
+
+var canvas_1 = new Canvas("canvas_1"),
+    canvas_2 = new Canvas("canvas_2"),
+    canvas_3 = new Canvas("canvas_3"),
+    canvas_4 = new Canvas("canvas_4"), 
+    canvas_5 = new Canvas("canvas_5");
 var canvases = [canvas_1, canvas_2, canvas_3, canvas_4, canvas_5];
-var anim_cooldown = 10.0;
-var anime_on = false;
-var xMax;
-var yMax;
+var anim_cooldown = 10.0, anime_on = false;
 
-function min(x, y){
-    if (x < y){return x;}
-    else{return y;}
-}
+function min(x, y){if (x < y){return x;}else{return y;}}
 
-window.onload = function(){
+window.onload = function()
+{
     canvas_width_old = 944;
     canvas_height_old = 527;
-    zoom_scale_x = 1;
-    zoom_scale_y = 1;
-    engine = Engine.create();
-    engine.world.gravity.y = 0; 
-    speed = 10;
-    render = 1000 / 30
-    voronoi_on = true;
-    delone_on = false;
-    canvases.forEach(canvas=> {resizeCanvas(canvas.cnv);})
+    engine = Engine.create(); engine.world.gravity.y = 0; 
+    speed = 10; render = 1;
+    voronoi_on = true; delone_on = false;
+    canvases.forEach(canvas=> {resizeCanvas(canvas);})
     recordinate_points();
     animate();
     
     canvas_5.points.push({x:150, y: 200});drew_point(canvas_5.ctx, new Point(150, 200), canvas_5.rad);
     canvas_5.points.push({x: 300,y: 250});drew_point(canvas_5.ctx, new Point(300, 250), canvas_5.rad);
-    
 }
 
 
 function resizeCanvas(canvas)
 {
-    canvas_width_old = canvas.width;
-    canvas_height_old = canvas.height;
-    xMax = canvas.width  = window.innerWidth * 0.5 + 100;
-    yMax = canvas.height = window.innerHeight * 0.75;
-    zoom_scale_x = canvas.width / canvas_width_old;
-    zoom_scale_y = canvas.height  / canvas_height_old; 
+    canvas_width_old = canvas.cnv.width; canvas_height_old = canvas.cnv.height;
+    canvas.cnv.width  = window.innerWidth * 0.45 + 150; canvas.cnv.height = window.innerHeight * 0.75;
+    this.zoom_scale_x = canvas.width / canvas_width_old; this.zoom_scale_y = canvas.height  / canvas_height_old; 
 }
 
 window.addEventListener('resize', function(){canvases.forEach(canvas=> {resizeCanvas(canvas.cnv);});recordinate_points();});
 
-function recordinate_points(){
-    engine = Engine.create();
-    engine.world.gravity.y = 0; 
+function recordinate_points()
+{
+    engine = Engine.create(); engine.world.gravity.y = 0; 
     let old_points_canvas_1 = [...points_bodies_canvas_1];
-    canvas_1.points= [];
-    points_bodies_canvas_1 = [];
-    for (let i = 0; i < old_points_canvas_1.length; i++){
-        old_body_canvas_1({x: old_points_canvas_1[i].position.x * zoom_scale_x,
-        y: old_points_canvas_1[i].position.y * zoom_scale_y,}, old_points_canvas_1[i].velocity)
-    }
+    canvas_1.points= []; points_bodies_canvas_1 = [];
+    old_points_canvas_1.forEach(point=>{
+        old_body_canvas_1({x: point.position.x * canvas_1.zoom_scale_x,
+                           y: point.position.y * canvas_1.zoom_scale_y,}, 
+                           point.velocity)
+    })
     spawn_walls();
 
     canvases.slice(1, 4).forEach(canvas=>{
         canvas.points.forEach(point=>{
-            point.x = point.x * zoom_scale_x;
-            point.y = point.y * zoom_scale_y;
+            point.x = point.x * canvas.zoom_scale_x;
+            point.y = point.y * canvas.zoom_scale_y;
         })
-        canvas.ctx.clearRect(0, 0, canvas.cnv.width, canvas.cnv.height);
-        drew_points(canvas.ctx, canvas.points, canvas.rad);
+        canvas.clear();
+        canvas.drew_points();
     })
 }
 
 function new_rad_points(rad){
-    engine = Engine.create();
-    engine.world.gravity.y = 0; 
+    engine = Engine.create(); engine.world.gravity.y = 0; 
     let old_points_canvas_1 = [...points_bodies_canvas_1];
-    canvas_1.points= [];
-    points_bodies_canvas_1 = [];
+    canvas_1.points= []; points_bodies_canvas_1 = [];
     canvas_1.rad = rad;
-    for (let i = 0; i < old_points_canvas_1.length; i++){
-        old_body_canvas_1({x: old_points_canvas_1[i].position.x,
-        y: old_points_canvas_1[i].position.y}, old_points_canvas_1[i].velocity)
-    }
+    old_points_canvas_1.forEach(point=>{
+        old_body_canvas_1({x: point.position.x,
+                           y: point.position.y}, 
+                           point.velocity)
+    })
     spawn_walls();
 }
 
@@ -132,33 +124,17 @@ function spawn_walls(){
 
 function getMousePos(canvas, event) {
   var rect = canvas.getBoundingClientRect();
-  return {
-    x: event.clientX - rect.left,
-    y: event.clientY - rect.top
-  };
+  return {x: event.clientX - rect.left, y: event.clientY - rect.top};
 };
 
-function check_cords(cords, points, rad){
-    if ((cords.x - rad < 0) || (cords.y - rad < 0)){return false;}
-    if ((cords.x + rad > xMax) || (cords.y + rad > yMax)){return false;}
-    for (let i = 0; i < points.length; i++){
-        if (Math.pow(cords.x - points[i].x, 2) + Math.pow(cords.y - points[i].y, 2) < 4 * rad * rad){
-            return false;
-        };
-    };
-    return true;
-};
-
-function new_point_canvas_1(event) {
-    mouse = getMousePos(canvas_1.cnv, event);
-    if (check_cords(mouse, canvas_1.points, canvas_1.rad)){new_body_canvas_1(mouse);}
-};
+function new_point_canvas_1(event) {mouse = getMousePos(canvas_1.cnv, event); new_body_canvas_1(mouse);};
 
 function new_body_canvas_1(mouse){
     let body = create_body_canvas_1(mouse);
     let angel = Math.random() * 2 * Math.PI;
     Matter.Body.setVelocity(body, {x: speed * Math.cos(angel), y: speed * Math.sin(angel),});
     canvas_1.points.push(body.position);
+    canvas_1.drew_points();
 }
 
 function old_body_canvas_1(mouse, velocity){
@@ -185,67 +161,51 @@ function create_body_canvas_1(mouse){
 
 function new_point_canvas_static(event, canvas) {
     mouse = getMousePos(canvas.cnv, event);
-    if (check_cords(mouse, canvas.points, canvas.rad)){
-        canvas.points.push({x:mouse.x, y:mouse.y});drew_point(canvas.ctx, mouse, canvas.rad);
-    };
+    if (canvas.check_cords(mouse)){canvas.points.push(new Point(mouse.x, mouse.y)); drew_point(canvas.ctx, mouse, canvas.rad);};
 };
 
 function clear_points_canvas_1(){
-    canvas_1.ctx.clearRect(0, 0, canvas_1.cnv.width, canvas_1.cnv.height);
-    engine = Engine.create();
-    spawn_walls()
-    engine.world.gravity.y = 0; 
-    canvas_1.points = [];
-    points_bodies_canvas_1 = [];
+    engine = Engine.create(); engine.world.gravity.y = 0; spawn_walls();
+    canvas_1.clear(); canvas_1.points = []; points_bodies_canvas_1 = [];
 }
 
-function redrew_points(canvas){canvas.ctx.clearRect(0, 0, canvas.cnv.width, canvas.cnv.height); canvas.drew_points();}
+function redrew_points(canvas){canvas.clear(); canvas.drew_points();}
 
-function clear_points(canvas){canvas.ctx.clearRect(0, 0, canvas.cnv.width, canvas.cnv.height);canvas.points = [];}
+function clear_points(canvas){canvas.clear();canvas.points = [];}
 
 function animate(){
-    canvas_1.ctx.clearRect(0, 0, canvas_1.cnv.width, canvas_1.cnv.height);
-    if (voronoi_on){voronoi(canvas_1);};
-    if (delone_on){delone(canvas_1);};
-    canvas_1.drew_points();
+    canvas_1.now = Date.now();
+    if (canvas_1.now - canvas_1.then > render){
+        canvas_1.then = canvas_1.now;
+        canvas_1.clear();
+        if (voronoi_on){voronoi(canvas_1);}; if (delone_on){delone(canvas_1);};
+        canvas_1.drew_points();
+        Engine.update(engine, render); 
+    }
     requestAnimationFrame(animate);
-    Engine.update(engine, render);
 }
 
 function turn_voronoi(){voronoi_on = !voronoi_on;}
 function turn_delone(){delone_on = !delone_on;}
-function clear_edges(canvas){canvas.ctx.clearRect(0, 0, canvas.cnv.width, canvas.cnv.height); canvas.drew_points();}
+function clear_edges(canvas){canvas.clear(); canvas.drew_points();}
 
 function voronoi(canvas){
     if (canvas.points.length < 2){return;}
     let vor = new VoronoiDiagram(canvas.points, canvas.cnv.width, canvas.cnv.height); 
-    vor.update();
-    let segments = vor.edges;
-    for (let i = 0; i < segments.length; i++){
-        if (segments[i] != null){
-            drew_segments(canvas.ctx, segments[i]);
-        }
-    }
+    vor.update(); let segments = vor.edges;
+    segments.forEach(segm=>{if (segm != null){drew_segments(canvas.ctx, segm);}}) 
 }
 
 function delone(canvas){
-    tri = new Triangulation(xMax, yMax);
-    canvas.points.forEach(point =>{
-        tri.add_point(point);
-    })
-    tri.chop(xMax, yMax);
-    tri.triangles.forEach(triangle=> {
-        drew_triangle(canvas.ctx, triangle);
-    })
-    canvas.drew_points();
+    tri = new Triangulation(canvas.cnv.width, canvas.cnv.height); canvas.points.forEach(point =>{tri.add_point(point);})
+    tri.chop(canvas.cnv.width, canvas.cnv.height);
+    tri.triangles.forEach(triangle=> {drew_triangle(canvas.ctx, triangle, "red");})
 }
 
 function start_delone_animation(){
-    cashe = [...canvas_3.points];
-    anim_length = cashe.length + 1;
-    tri = new Triangulation_anim(xMax, yMax, canvas_3.rad);
-    then = Date.now();
-    anime_on = true;
+    cashe = [...canvas_3.points]; anim_length = cashe.length + 1;
+    tri = new Triangulation_anim(canvas_3.cnv.width, canvas_3.cnv.height, canvas_3.rad);
+    then = Date.now(); anime_on = true;
     delone_anim();
 }
 
@@ -253,38 +213,37 @@ function delone_anim(){
     now = Date.now();
     let elapsed = now - then;
     if (elapsed > anim_cooldown){
-        anime_on = tri.anim(canvas_3.ctx, cashe, canvas_3.points, xMax, yMax);
+        anime_on = tri.anim(canvas_3.ctx, cashe, canvas_3.points, canvas_3.cnv.width, canvas_3.cnv.height);
         then = now;
     }
     if (anime_on){requestAnimationFrame(delone_anim);}
-    else{canvas_3.ctx.clearRect(0, 0, xMax, yMax) ;tri.triangles.forEach(triangle=> {drew_triangle(canvas_3.ctx, triangle, "green");}) ;canvas_3.drew_points();}
+    else{canvas_3.clear(); tri.triangles.forEach(triangle=> {drew_triangle(canvas_3.ctx, triangle, "green");}); canvas_3.drew_points();}
 }
 
 function start_voronoi(){
     then = Date.now();
     vor_anim = new VoronoiDiagram_anim(canvas_4.points, canvas_4.cnv.width, canvas_4.cnv.height, canvas_4.ctx);
     vor_anim.update_start();
-    anime_on = true;
-    voronoi_anim();
+    anime_on = true; voronoi_anim();
 }
 
 function voronoi_anim(){
     now = Date.now();
     let elapsed = now - then;
     if (elapsed > anim_cooldown){
-        canvas_4.ctx.clearRect(0, 0, xMax, yMax);
+        canvas_4.clear();
         anime_on = vor_anim.update();
         canvas_4.drew_points();
         then = now;
     }
     if (anime_on){requestAnimationFrame(voronoi_anim);}
-    else{canvas_4.ctx.clearRect(0, 0, xMax, yMax);canvas_4.drew_points(); 
+    else{canvas_4.clear();canvas_4.drew_points(); 
 		vor_anim.edges.forEach(edge=> {if (edge != null){drew_segments(canvas_4.ctx, edge, "green");}})}	
 }
 
 
 function arcs_move(event){
-    canvas_5.ctx.clearRect(0, 0, canvas_5.cnv.width, canvas_5.cnv.height);
+    canvas_5.clear();
     mouse = getMousePos(canvas_5.cnv, event);
     let y = mouse.y;
     let k = 10000;
@@ -295,7 +254,7 @@ function arcs_move(event){
     let d_2 = (-point_2.y + y) / 2;
     let x = parab_intersect(y, point_1, point_2);
 
-    drew_line(ctx, [new Point(0, y), new Point(xMax, y)], "grey");
+    drew_line(ctx, [new Point(0, y), new Point(canvas_5.cnv.width, y)], "grey");
     
     ctx.beginPath();
     ctx.moveTo(point_1.x - k, y - d - (k**2) / (2 * d));
