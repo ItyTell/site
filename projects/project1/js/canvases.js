@@ -47,7 +47,7 @@ var canvas_1 = new Canvas("canvas_1"),
     canvas_4 = new Canvas("canvas_4"), 
     canvas_5 = new Canvas("canvas_5");
 var canvases = [canvas_1, canvas_2, canvas_3, canvas_4, canvas_5];
-var anim_cooldown = 10.0, anime_on = false;
+var anim_cooldown_1, anime_on = false, anim_cooldown_2;
 
 function min(x, y){if (x < y){return x;}else{return y;}}
 
@@ -57,6 +57,8 @@ window.onload = function()
     canvas_height_old = 527;
     engine = Engine.create(); engine.world.gravity.y = 0; 
     speed = 10; render = 1;
+    anim_cooldown_1 = document.getElementById("canvas_3_anim_speed").valueAsNumber;
+    anim_cooldown_2 = document.getElementById("canvas_4_anim_speed").valueAsNumber;
     voronoi_on = true; delone_on = false;
     canvases.forEach(canvas=> {resizeCanvas(canvas);})
     recordinate_points();
@@ -74,7 +76,7 @@ function resizeCanvas(canvas)
     this.zoom_scale_x = canvas.width / canvas_width_old; this.zoom_scale_y = canvas.height  / canvas_height_old; 
 }
 
-window.addEventListener('resize', function(){canvases.forEach(canvas=> {resizeCanvas(canvas.cnv);});recordinate_points();});
+window.addEventListener('resize', function(){canvases.forEach(canvas=> {resizeCanvas(canvas);});recordinate_points();});
 
 function recordinate_points()
 {
@@ -159,10 +161,8 @@ function create_body_canvas_1(mouse){
     return body;
 }
 
-function new_point_canvas_static(event, canvas) {
-    mouse = getMousePos(canvas.cnv, event);
-    if (canvas.check_cords(mouse)){canvas.points.push(new Point(mouse.x, mouse.y)); drew_point(canvas.ctx, mouse, canvas.rad);};
-};
+function new_point_canvas_static(event, canvas) {mouse = getMousePos(canvas.cnv, event); new_point(mouse, canvas);};
+function new_point(mouse, canvas){if (canvas.check_cords(mouse)){canvas.points.push(new Point(mouse.x, mouse.y)); drew_point(canvas.ctx, mouse, canvas.rad);};}
 
 function clear_points_canvas_1(){
     engine = Engine.create(); engine.world.gravity.y = 0; spawn_walls();
@@ -212,7 +212,7 @@ function start_delone_animation(){
 function delone_anim(){
     now = Date.now();
     let elapsed = now - then;
-    if (elapsed > anim_cooldown){
+    if (elapsed > anim_cooldown_1){
         anime_on = tri.anim(canvas_3.ctx, cashe, canvas_3.points, canvas_3.cnv.width, canvas_3.cnv.height);
         then = now;
     }
@@ -230,7 +230,7 @@ function start_voronoi(){
 function voronoi_anim(){
     now = Date.now();
     let elapsed = now - then;
-    if (elapsed > anim_cooldown){
+    if (elapsed > anim_cooldown_2){
         canvas_4.clear();
         anime_on = vor_anim.update();
         canvas_4.drew_points();
@@ -270,26 +270,38 @@ function arcs_move(event){
     canvas_5.drew_points();
 }
 
+function rand_points(canvas){for (let i = 0; i < 10; i++){new_point({x: Math.random() * canvas.cnv.width, y: Math.random() * canvas.cnv.height}, canvas)}}
 
 document.getElementById("canvas_1_clear").onclick = function(){clear_points_canvas_1();}
+document.getElementById("canvas_1_rand").onclick = function(){for (let i = 0; i < 10; i++){new_body_canvas_1({x: Math.random() * canvas_1.cnv.width, y: Math.random() * canvas_1.cnv.height})}}
 document.getElementById("canvas_1_voronoi").onclick = function(){turn_voronoi();}
 document.getElementById("canvas_1_delone").onclick = function(){turn_delone();}
+document.getElementById("canvas_1").onclick = function(){new_point_canvas_1(event)}
 
 document.getElementById("canvas_1_rad").oninput = function(){new_rad_points(this.valueAsNumber);}
 
 document.getElementById("canvas_2_clear").onclick = function(){clear_points(canvas_2);}
+document.getElementById("canvas_2_rand").onclick = function(){rand_points(canvas_2)}
 document.getElementById("canvas_2_voronoi").onclick = function(){clear_edges(canvas_2); voronoi(canvas_2)}
 document.getElementById("canvas_2_delone").onclick = function(){clear_edges(canvas_2); delone(canvas_2)}
+document.getElementById("canvas_2").onclick = function(){new_point_canvas_static(event, canvas_2);}
 
 document.getElementById("canvas_2_rad").oninput = function(){canvas_2.rad = this.valueAsNumber; redrew_points(canvas_2);}
 
+document.getElementById("canvas_3_clear").onclick = function(){clear_points(canvas_3);}
 document.getElementById("canvas_3_delone").onclick = function(){start_delone_animation();}
+document.getElementById("canvas_3").onclick = function(){new_point_canvas_static(event, canvas_3);}
 
 document.getElementById("canvas_3_rad").oninput = function(){canvas_3.rad = this.valueAsNumber; redrew_points(canvas_3);}
+document.getElementById("canvas_3_anim_speed").oninput = function(){anim_cooldown_1 = 1500 - 15 * this.valueAsNumber;}
 
+document.getElementById("canvas_4_clear").onclick = function(){clear_points(canvas_4);}
+document.getElementById("canvas_4_rand").onclick = function(){rand_points(canvas_4)}
 document.getElementById("canvas_4_voronoi").onclick = function(){start_voronoi();}
+document.getElementById("canvas_4").onclick = function(){new_point_canvas_static(event, canvas_4);}
 
 document.getElementById("canvas_4_rad").oninput = function(){canvas_4.rad = this.valueAsNumber; redrew_points(canvas_4);}
+document.getElementById("canvas_4_anim_speed").oninput = function(){anim_cooldown_2 = 100 - 10 * this.valueAsNumber;}
 
 canvas_5.cnv.addEventListener('mousemove', (event) => {arcs_move(event);});
 

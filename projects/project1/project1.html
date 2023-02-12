@@ -62,10 +62,11 @@
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
-                    <canvas id="canvas_1" class="canvas" onclick="new_point_canvas_1(event)" ></canvas>
+                    <canvas id="canvas_1" class="canvas"></canvas>
                 </div>
                 <div>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_1_clear" >Clear points</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_1_rand">Add points</a>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_1_voronoi">Voronoi</a>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_1_delone">Delone</a>
                     <div>
@@ -79,13 +80,17 @@
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
-                    <canvas id="canvas_2" class="canvas" onclick="new_point_canvas_static(event, canvas_2)" ></canvas>
+                    <canvas id="canvas_2" class="canvas"></canvas>
                 </div>
                 <div>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_2_clear">Clear points</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_2_rand">Add points</a>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_2_voronoi">Voronoi</a>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_2_delone">Delone</a>
-                    <input type="range" class="range" id="canvas_2_rad" name="radius of the points" min="1" max="10">
+                    <div>
+                        <input type="range" class="range" id="canvas_2_rad" name="radius of the points" min="1" max="10">
+                        <label for="canvas_2_rad">radius</label>
+                    </div>
                 </div>
             </div>
             <div class="row align-items-center justify-content-center py-5">
@@ -93,11 +98,19 @@
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
-                    <canvas id="canvas_3" class="canvas" onclick="new_point_canvas_static(event, canvas_3)" ></canvas>
+                    <canvas id="canvas_3" class="canvas"></canvas>
                 </div>
                 <div>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_3_clear">Clear points</a>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_3_delone" >Delone animation</a>
-                    <input type="range" class="range" id="canvas_3_rad" name="radius of the points" min="1" max="10">
+                    <div>
+                        <input type="range" class="range" id="canvas_3_rad" name="radius of the points" min="1" max="10">
+                        <label for="canvas_3_rad">radius</label>
+                    </div>
+                    <div>
+                        <input type="range" class="range" id="canvas_3_anim_speed" name="radius of the points" min="1" max="10" step="any">
+                        <label for="canvas_3_anim_speed">speed</label>
+                    </div>
                 </div>
             </div>
             <div class="row align-items-center justify-content-center py-5">
@@ -105,16 +118,25 @@
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
-                    <canvas id="canvas_4" class="canvas" onclick="new_point_canvas_static(event, canvas_4)" ></canvas>
+                    <canvas id="canvas_4" class="canvas"></canvas>
                 </div>
                 <div>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_4_clear">Clear points</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_4_rand">Add points</a>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_4_voronoi" >animation</a>
-                    <input type="range" class="range" id="canvas_4_rad" name="radius of the points" min="1" max="10">
+                    <div>
+                        <input type="range" class="range" id="canvas_4_rad" name="radius of the points" min="1" max="10">
+                        <label for="canvas_4_rad">radius</label>
+                    </div>
+                    <div>
+                        <input type="range" class="range" id="canvas_4_anim_speed" name="radius of the points" min="1" max="10" step="any">
+                        <label for="canvas_4_anim_speed">speed</label>
+                    </div>
                 </div>
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
-                    <canvas id="canvas_5" class="canvas" onclick="new_point_canvas_static(event, canvas_5)"  ></canvas>
+                    <canvas id="canvas_5" class="canvas"></canvas>
                     <div>
                         <input type="range" class="range" id="canvas_5_rad" name="radius of the points" min="1" max="10" value="3">
                     </div>
