@@ -63,9 +63,11 @@ window.onload = function()
     canvases.forEach(canvas=> {resizeCanvas(canvas);})
     recordinate_points();
     animate();
-    
-    canvas_5.points.push({x:150, y: 200});drew_point(canvas_5.ctx, new Point(150, 200), canvas_5.rad);
-    canvas_5.points.push({x: 300,y: 250});drew_point(canvas_5.ctx, new Point(300, 250), canvas_5.rad);
+
+    new_point({x:150, y: 200}, canvas_5) 
+    new_point({x:300, y: 250}, canvas_5) 
+    new_point({x:370, y: 100}, canvas_5) 
+    new_point({x: canvas_5.cnv.width - canvas_5.rad - 2, y: canvas_5.cnv.height - canvas_5.rad - 2}, canvas_5) 
 }
 
 
@@ -245,29 +247,14 @@ function voronoi_anim(){
 function arcs_move(event){
     canvas_5.clear();
     mouse = getMousePos(canvas_5.cnv, event);
+    let vor_dem = new VoronoiDiagram_demo(canvas_5.points, canvas_5.cnv.width, canvas_5.cnv.height, canvas_5.ctx);
     let y = mouse.y;
-    let k = 10000;
-    let point_1 = canvas_5.points[0];
-    let ctx = canvas_5.ctx;
-    let d = (-point_1.y + y) / 2;
-    let point_2 = canvas_5.points[1];
-    let d_2 = (-point_2.y + y) / 2;
-    let x = parab_intersect(y, point_1, point_2);
-
-    drew_line(ctx, [new Point(0, y), new Point(canvas_5.cnv.width, y)], "grey");
-    
-    ctx.beginPath();
-    ctx.moveTo(point_1.x - k, y - d - (k**2) / (2 * d));
-    ctx.quadraticCurveTo(point_1.x - k / 2, y - d, point_1.x, y - d);
-    ctx.quadraticCurveTo(point_1.x / 2 + x / 2, y - d, x, y - d - ((x - point_1.x)**2) / (2 * d));
-
-
-    ctx.quadraticCurveTo(point_2.x / 2 + x / 2, y - d_2, point_2.x, y - d_2);
-    ctx.quadraticCurveTo(point_2.x + k / 2, y - d_2, point_2.x + k, y - d_2 - (k**2) / (2 * d));
-    
-    ctx.strokeStyle = "red";
-    ctx.stroke();
+    vor_dem.update_start();
+    vor_dem.update(y);
+    canvas_5.clear();
+    vor_dem.end(y);
     canvas_5.drew_points();
+
 }
 
 function rand_points(canvas){for (let i = 0; i < 10; i++){new_point({x: Math.random() * canvas.cnv.width, y: Math.random() * canvas.cnv.height}, canvas)}}
@@ -304,4 +291,5 @@ document.getElementById("canvas_4_rad").oninput = function(){canvas_4.rad = this
 document.getElementById("canvas_4_anim_speed").oninput = function(){anim_cooldown_2 = 100 - 10 * this.valueAsNumber;}
 
 canvas_5.cnv.addEventListener('mousemove', (event) => {arcs_move(event);});
+document.getElementById("canvas_5").onclick = function(){new_point_canvas_static(event, canvas_5)}
 

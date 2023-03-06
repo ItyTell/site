@@ -1,9 +1,12 @@
-class VoronoiDiagram {
-	constructor(points, width, height) {
+class VoronoiDiagram_demo {
+
+	constructor(points, width, height, ctx) {
 		this.point_list = points;
 		this.reset();
 		this.box_x = width;
 		this.box_y = height;
+        this.ctx = ctx;
+		this.y = 0;
 	}
 
 	reset() {
@@ -11,27 +14,44 @@ class VoronoiDiagram {
 		this.beachline_root = null;
 		this.voronoi_vertex = [];
 		this.edges = [];
+		this.e = null;
+		this.y = 0;
 	}
 
-	update() {
+	update_start() {
 		this.reset();
 		let points = [];
-		let e = null;
 		for (const p of this.point_list) points.push(new Event("point", p));
 		this.event_list.points = points;
+		this.e = this.event_list.extract_first();
+        return true;
+	}
 
-		while (this.event_list.length > 0) {
-			e = this.event_list.extract_first();
-			if (e.type == "point") this.point_event(e.position);
-			else if (e.active) this.circle_event(e);
-			// last_event = e.position;
+    update(y){
+		while (this.event_list.length > 0 && this.e.position.y < y) {
+			if (this.e.type == "point") this.point_event(this.e.position);
+			else {if (this.e.active) {this.circle_event(this.e);}}
+			this.e = this.event_list.extract_first();
+			this.y += speed;
 		}
-		this.complete_segments(e.position);
+        return true;
+    }
+
+	end(y){if (this.e.position.y >= y){this.drew(new Point(0, y));} }
+
+	drew(p){
+		drew_line(this.ctx, [new Point(0, p.y), new Point(this.box_x, p.y)], "grey");
+		let q = this.beachline_root;
+		while(q != null){
+			drew_arc(this.ctx, p.y, q, "red");
+			q = q.right; 
+		}
+		this.edges.forEach(edge=> {if (edge.start != null && edge.end != null){drew_segments(this.ctx, edge, "green");}})	
 	}
 
 	point_event(p) {
 		let q = this.beachline_root;
-		if (q == null) this.beachline_root = new Arc(null, null, p, null, null);
+		if (q == null) {this.beachline_root = new Arc(null, null, p, null, null);}
 		else {
 			while (
 				q.right != null &&
@@ -61,6 +81,7 @@ class VoronoiDiagram {
 	}
 
 	circle_event(e) {
+		drew_circle(this.ctx, new Circle(e.vertex, e.vertex.distance(e.caller.focus)), "red")
 		let arc = e.caller;
 		let p = e.position;
 		let edge_new = new Edge(arc.left.focus, arc.right.focus);
@@ -75,7 +96,7 @@ class VoronoiDiagram {
 
 		this.edges.push(edge_new);
 
-		if (!this.point_outside(e.vertex)) this.voronoi_vertex.push(e.vertex); 
+		if (!this.point_outside(e.vertex)) this.voronoi_vertex.push(e.vertex);
 		arc.edge.left.end = arc.edge.right.end = edge_new.start = e.vertex; 
 
 		this.add_circle_event(p, arc.left);
@@ -116,8 +137,8 @@ class VoronoiDiagram {
 		let fyDiff = f1.y - f2.y;
 		if (fyDiff == 0) return (f1.x + f2.x) / 2;
 		let fxDiff = f1.x - f2.x;
-		let b1md = f1.y - y; 
-		let b2md = f2.y - y; 
+		let b1md = f1.y - y;
+		let b2md = f2.y - y;
 		let h1 = (-f1.x * b2md + f2.x * b1md) / fyDiff;
 		let h2 = Math.sqrt(b1md * b2md * (fxDiff ** 2 + fyDiff ** 2)) / fyDiff;
 
@@ -137,7 +158,6 @@ class VoronoiDiagram {
 		}
 	}
 
-	 
 	complete_segments(last) {
 		let r = this.beachline_root;
 		let e, x, y;
@@ -147,7 +167,7 @@ class VoronoiDiagram {
 				last.y * 1.1,
 				e.arc.left,
 				e.arc.right
-			); 
+			);
 			y = e.getY(x);
 
 			if (
@@ -155,7 +175,7 @@ class VoronoiDiagram {
 				(e.start.x < 0 && x < e.start.x) ||
 				(e.start.x > this.box_x && x > e.start.x)
 			) {
-				e.end = e.start;
+				e.end = e.start; 
 			} else {
 				if (e.m == 0) {
 					x - e.start.x <= 0 ? (x = 0) : (x = this.box_x);
@@ -200,7 +220,7 @@ class VoronoiDiagram {
 	edge_end(e, y_lim) {
 		let x = Math.min(this.box_x, Math.max(0, e.getX(y_lim)));
 		let y = e.getY(x);
-		if (!y) y = y_lim; // In this case the edge is vertical
+		if (!y) y = y_lim; 
 		let p = new Point(x, y);
 		this.voronoi_vertex.push(p);
 		return p;
@@ -209,4 +229,15 @@ class VoronoiDiagram {
 	point_outside(p) {
 		return p.x < 0 || p.x > this.box_x || p.y < 0 || p.y > this.box_y;
 	}
+}
+
+function parab_intersect(y, f1, f2) {
+	let fyDiff = f1.y - f2.y;
+	if (fyDiff == 0) return (f1.x + f2.x) / 2;
+	let fxDiff = f1.x - f2.x;
+	let b1md = f1.y - y; 
+	let b2md = f2.y - y; 
+	let h1 = (-f1.x * b2md + f2.x * b1md) / fyDiff;
+	let h2 = Math.sqrt(b1md * b2md * (fxDiff ** 2 + fyDiff ** 2)) / fyDiff;
+	return h1 + h2; 
 }
