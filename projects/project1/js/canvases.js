@@ -11,7 +11,15 @@ class Canvas {
 
     clear(){this.ctx.clearRect(0, 0, this.cnv.width, this.cnv.height);}
 
-    drew_points(){this.points.forEach(point=>{drew_point(this.ctx, point, this.rad);})}
+    drew_points(cnv3=false){
+        this.points.forEach(point=>{drew_point(this.ctx, point, this.rad);})
+        if(cnv3){
+
+            drew_triangle(canvas_3.ctx, 
+                            new Triangle(new Point(20, 20), new Point(canvas_3.cnv.width - 20, 20), new Point(canvas_3.cnv.width / 2, canvas_3.cnv.height - 20)), "grey")
+
+        }
+    }
 
     check_cords(cords){
         let flag = true;
@@ -58,16 +66,19 @@ window.onload = function()
     engine = Engine.create(); engine.world.gravity.y = 0; 
     speed = 10; render = 1;
     anim_cooldown_1 = document.getElementById("canvas_3_anim_speed").valueAsNumber;
+    anim_cooldown_1 = 800 - 70 * anim_cooldown_1
     anim_cooldown_2 = document.getElementById("canvas_4_anim_speed").valueAsNumber;
     voronoi_on = true; delone_on = false;
     canvases.forEach(canvas=> {resizeCanvas(canvas);})
     recordinate_points();
     animate();
 
-    new_point({x:150, y: 200}, canvas_5) 
-    new_point({x:300, y: 250}, canvas_5) 
-    new_point({x:370, y: 100}, canvas_5) 
-    new_point({x: canvas_5.cnv.width - canvas_5.rad - 2, y: canvas_5.cnv.height - canvas_5.rad - 2}, canvas_5) 
+    drew_triangle(canvas_3.ctx, 
+        new Triangle(new Point(20, 20), new Point(canvas_3.cnv.width - 20, 20), new Point(canvas_3.cnv.width / 2, canvas_3.cnv.height - 20)), "grey")
+
+    canvas_5.points.push(new Point(100000, 10000));
+    canvas_5.points.push(new Point(100200, 10000));
+    canvas_5.points.push(new Point(100400, 10400));
 }
 
 
@@ -115,6 +126,19 @@ function new_rad_points(rad){
     spawn_walls();
 }
 
+function new_vel_points(vel){
+    engine = Engine.create(); engine.world.gravity.y = 0; 
+    let old_points_canvas_1 = [...points_bodies_canvas_1];
+    canvas_1.points= []; points_bodies_canvas_1 = [];
+    canvas_1.rad = rad;
+    old_points_canvas_1.forEach(point=>{
+        old_body_canvas_1({x: point.position.x,
+                           y: point.position.y}, 
+                          {x: point.velocity.x * vel / 5,
+                           y: point.velocity.y * vel / 5})
+    })
+    spawn_walls();
+}
 
 function spawn_walls(){
     Matter.World.remove(engine.world, walls);
@@ -219,7 +243,7 @@ function delone_anim(){
         then = now;
     }
     if (anime_on){requestAnimationFrame(delone_anim);}
-    else{canvas_3.clear(); tri.triangles.forEach(triangle=> {drew_triangle(canvas_3.ctx, triangle, "green");}); canvas_3.drew_points();}
+    else{canvas_3.clear(); tri.triangles.forEach(triangle=> {drew_triangle(canvas_3.ctx, triangle, "green");}); canvas_3.drew_points(true);}
 }
 
 function start_voronoi(){
@@ -266,6 +290,7 @@ document.getElementById("canvas_1_delone").onclick = function(){turn_delone();}
 document.getElementById("canvas_1").onclick = function(){new_point_canvas_1(event)}
 
 document.getElementById("canvas_1_rad").oninput = function(){new_rad_points(this.valueAsNumber);}
+document.getElementById("canvas_1_speed").oninput = function(){new_vel_points(this.valueAsNumber);}
 
 document.getElementById("canvas_2_clear").onclick = function(){clear_points(canvas_2);}
 document.getElementById("canvas_2_rand").onclick = function(){rand_points(canvas_2)}
@@ -280,7 +305,7 @@ document.getElementById("canvas_3_delone").onclick = function(){start_delone_ani
 document.getElementById("canvas_3").onclick = function(){new_point_canvas_static(event, canvas_3);}
 
 document.getElementById("canvas_3_rad").oninput = function(){canvas_3.rad = this.valueAsNumber; redrew_points(canvas_3);}
-document.getElementById("canvas_3_anim_speed").oninput = function(){anim_cooldown_1 = 1500 - 15 * this.valueAsNumber;}
+document.getElementById("canvas_3_anim_speed").oninput = function(){anim_cooldown_1 = 800 - 70 * this.valueAsNumber;}
 
 document.getElementById("canvas_4_clear").onclick = function(){clear_points(canvas_4);}
 document.getElementById("canvas_4_rand").onclick = function(){rand_points(canvas_4)}
@@ -288,8 +313,9 @@ document.getElementById("canvas_4_voronoi").onclick = function(){start_voronoi()
 document.getElementById("canvas_4").onclick = function(){new_point_canvas_static(event, canvas_4);}
 
 document.getElementById("canvas_4_rad").oninput = function(){canvas_4.rad = this.valueAsNumber; redrew_points(canvas_4);}
-document.getElementById("canvas_4_anim_speed").oninput = function(){anim_cooldown_2 = 100 - 10 * this.valueAsNumber;}
+document.getElementById("canvas_4_anim_speed").oninput = function(){anim_cooldown_2 = (15 - this.valueAsNumber) / 100;}
 
 canvas_5.cnv.addEventListener('mousemove', (event) => {arcs_move(event);});
 document.getElementById("canvas_5").onclick = function(){new_point_canvas_static(event, canvas_5)}
+document.getElementById("canvas_5_rad").oninput = function(){canvas_5.rad = this.valueAsNumber; redrew_points(canvas_5);}
 

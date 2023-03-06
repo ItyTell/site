@@ -24,7 +24,6 @@ class VoronoiDiagram {
 			e = this.event_list.extract_first();
 			if (e.type == "point") this.point_event(e.position);
 			else if (e.active) this.circle_event(e);
-			// last_event = e.position;
 		}
 		this.complete_segments(e.position);
 	}
