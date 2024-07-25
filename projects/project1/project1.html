@@ -70,11 +70,7 @@
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_1_voronoi">Voronoi</a>
                     <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_1_delone">Delone</a>
                     <div>
-                        <input type="range" class="range" id="canvas_1_rad" name="radius of the points" min="1" max="10" value="3">
-                        <label for="canvas_1_rad">radius</label>
-                    </div>
-                    <div>
-                        <input type="range" class="range" id="canvas_1_speed" name="speed of points" min="1" max="10" step="any">
+                        <input type="range" class="range" id="canvas_1_speed" name="speed of points" min="1" max="20" step="any">
                         <label for="speed of points">speed</label>
                     </div>
                 </div>
@@ -102,19 +98,19 @@
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
-                    <canvas id="canvas_4" class="canvas"></canvas>
+                    <canvas id="canvas_3" class="canvas"></canvas>
                 </div>
                 <div>
-                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_4_clear">Clear points</a>
-                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_4_rand">Add points</a>
-                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_4_voronoi" >animation</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_3_clear">Clear points</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_3_rand">Add points</a>
+                    <a class="btn btn-outline-primary d-lg-block canvas_button" id="canvas_3_voronoi" >animation</a>
                     <div>
-                        <input type="range" class="range" id="canvas_4_rad" name="radius of the points" min="1" max="10">
-                        <label for="canvas_4_rad">radius</label>
+                        <input type="range" class="range" id="canvas_3_rad" name="radius of the points" min="1" max="10">
+                        <label for="canvas_3_rad">radius</label>
                     </div>
                     <div>
-                        <input type="range" class="range" id="canvas_4_anim_speed" name="radius of the points" min="1" max="10" step="any">
-                        <label for="canvas_4_anim_speed">speed</label>
+                        <input type="range" class="range" id="canvas_3_anim_speed" name="radius of the points" min="1" max="10" step="any">
+                        <label for="canvas_3_anim_speed">speed</label>
                     </div>
                 </div>
             </div>
@@ -123,9 +119,9 @@
             </div>
             <div class="row align-items-center">
                 <div class="canvas_1_box">
-                    <canvas id="canvas_5" class="canvas"></canvas>
+                    <canvas id="canvas_4" class="canvas"></canvas>
                     <div>
-                        <input type="range" class="range" id="canvas_5_rad" name="radius of the points" min="1" max="10" value="3">
+                        <input type="range" class="range" id="canvas_4_rad" name="radius of the points" min="1" max="10" value="3">
                     </div>
                 </div>
                 <div>
@@ -317,7 +313,7 @@
 
     <!-- Template Javascript -->
     <script src="../../js/main.js"></script>
-    <script src="js\canvases.js"> </script>
+    <script src="js\main.js"> </script>
     <script src="js/Voronoi.js"></script>
     <script src="js/Delone.js"></script>
     <script src="js/geom_classes.js"></script>
