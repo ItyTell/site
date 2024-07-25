@@ -8,6 +8,7 @@ class VoronoiDiagram_anim {
 		this.box_y = height;
         this.ctx = ctx;
 		this.y = 0;
+		this.speed = 1/4;
 	}
 
 	reset() {
@@ -29,14 +30,13 @@ class VoronoiDiagram_anim {
 	}
 
     update(){
-		let speed = 1 / 4;
-		if (Math.abs(this.y - this.e.position.y) > speed){this.drew(new Point (0, this.y)); this.y += speed; return true;}
+		if (Math.abs(this.y - this.e.position.y) > this.speed){this.drew(new Point (0, this.y)); this.y += this.speed; return true;}
 		if (this.event_list.length > 0) {
 			this.drew(this.e.position);
 			if (this.e.type == "point") this.point_event(this.e.position);
 			else {if (this.e.active) {this.circle_event(this.e);}}
 			this.e = this.event_list.extract_first();
-			this.y += speed;
+			this.y += this.speed;
 		}
         else {this.complete_segments(this.e.position); return false;}
         return true;

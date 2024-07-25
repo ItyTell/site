@@ -13,12 +13,6 @@ class Canvas {
 
     drew_points(cnv3=false){
         this.points.forEach(point=>{drew_point(this.ctx, point, this.rad);})
-        if(cnv3){
-
-            drew_triangle(canvas_3.ctx, 
-                            new Triangle(new Point(20, 20), new Point(canvas_3.cnv.width - 20, 20), new Point(canvas_3.cnv.width / 2, canvas_3.cnv.height - 20)), "grey")
-
-        }
     }
 
     check_cords(cords){
@@ -51,10 +45,9 @@ var anim_length;
 
 var canvas_1 = new Canvas("canvas_1"),
     canvas_2 = new Canvas("canvas_2"),
-    canvas_3 = new Canvas("canvas_3"),
     canvas_4 = new Canvas("canvas_4"), 
     canvas_5 = new Canvas("canvas_5");
-var canvases = [canvas_1, canvas_2, canvas_3, canvas_4, canvas_5];
+var canvases = [canvas_1, canvas_2, canvas_4, canvas_5];
 var anim_cooldown_1, anime_on = false, anim_cooldown_2;
 
 function min(x, y){if (x < y){return x;}else{return y;}}
@@ -65,16 +58,11 @@ window.onload = function()
     canvas_height_old = 527;
     engine = Engine.create(); engine.world.gravity.y = 0; 
     speed = 10; render = 1;
-    anim_cooldown_1 = document.getElementById("canvas_3_anim_speed").valueAsNumber;
-    anim_cooldown_1 = 800 - 70 * anim_cooldown_1
     anim_cooldown_2 = document.getElementById("canvas_4_anim_speed").valueAsNumber;
     voronoi_on = true; delone_on = false;
     canvases.forEach(canvas=> {resizeCanvas(canvas);})
     recordinate_points();
     animate();
-
-    drew_triangle(canvas_3.ctx, 
-        new Triangle(new Point(20, 20), new Point(canvas_3.cnv.width - 20, 20), new Point(canvas_3.cnv.width / 2, canvas_3.cnv.height - 20)), "grey")
 
     canvas_5.points.push(new Point(100000, 10000));
     canvas_5.points.push(new Point(100200, 10000));
@@ -228,24 +216,6 @@ function delone(canvas){
     tri.triangles.forEach(triangle=> {drew_triangle(canvas.ctx, triangle, "red");})
 }
 
-function start_delone_animation(){
-    cashe = [...canvas_3.points]; anim_length = cashe.length + 1;
-    tri = new Triangulation_anim(canvas_3.cnv.width, canvas_3.cnv.height, canvas_3.rad);
-    then = Date.now(); anime_on = true;
-    delone_anim();
-}
-
-function delone_anim(){
-    now = Date.now();
-    let elapsed = now - then;
-    if (elapsed > anim_cooldown_1){
-        anime_on = tri.anim(canvas_3.ctx, cashe, canvas_3.points, canvas_3.cnv.width, canvas_3.cnv.height);
-        then = now;
-    }
-    if (anime_on){requestAnimationFrame(delone_anim);}
-    else{canvas_3.clear(); tri.triangles.forEach(triangle=> {drew_triangle(canvas_3.ctx, triangle, "green");}); canvas_3.drew_points(true);}
-}
-
 function start_voronoi(){
     then = Date.now();
     vor_anim = new VoronoiDiagram_anim(canvas_4.points, canvas_4.cnv.width, canvas_4.cnv.height, canvas_4.ctx);
@@ -300,20 +270,13 @@ document.getElementById("canvas_2").onclick = function(){new_point_canvas_static
 
 document.getElementById("canvas_2_rad").oninput = function(){canvas_2.rad = this.valueAsNumber; redrew_points(canvas_2);}
 
-document.getElementById("canvas_3_clear").onclick = function(){clear_points(canvas_3);}
-document.getElementById("canvas_3_delone").onclick = function(){start_delone_animation();}
-document.getElementById("canvas_3").onclick = function(){new_point_canvas_static(event, canvas_3);}
-
-document.getElementById("canvas_3_rad").oninput = function(){canvas_3.rad = this.valueAsNumber; redrew_points(canvas_3);}
-document.getElementById("canvas_3_anim_speed").oninput = function(){anim_cooldown_1 = 800 - 70 * this.valueAsNumber;}
-
 document.getElementById("canvas_4_clear").onclick = function(){clear_points(canvas_4);}
 document.getElementById("canvas_4_rand").onclick = function(){rand_points(canvas_4)}
 document.getElementById("canvas_4_voronoi").onclick = function(){start_voronoi();}
 document.getElementById("canvas_4").onclick = function(){new_point_canvas_static(event, canvas_4);}
 
 document.getElementById("canvas_4_rad").oninput = function(){canvas_4.rad = this.valueAsNumber; redrew_points(canvas_4);}
-document.getElementById("canvas_4_anim_speed").oninput = function(){anim_cooldown_2 = (15 - this.valueAsNumber) / 100;}
+document.getElementById("canvas_4_anim_speed").oninput = function(){anim_cooldown_2 = (20 - this.valueAsNumber) / 100; vor_anim.speed = 1 / 4 + (this.valueAsNumber - 1) / 5;}
 
 canvas_5.cnv.addEventListener('mousemove', (event) => {arcs_move(event);});
 document.getElementById("canvas_5").onclick = function(){new_point_canvas_static(event, canvas_5)}
